@@ -156,6 +156,9 @@ PATHS_DIAGRAM = """\
  │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘"""
 
+# Outbound sponsor links carry UTM tags so sponsors can attribute visits to ghuntley.
+UTM = "utm_source=ghuntley&amp;utm_medium=referral&amp;utm_campaign=overalls"
+
 LANDING_DIAGRAM = """\
                                 ┌───────────────┐ ◀──▶ PostgreSQL
       browser ─HTTPS─▶ proxy ─▶ │    Marshall   │
@@ -275,9 +278,9 @@ def landing():
 <h2 id="sponsors">Donors and sponsors</h2>
 <p>Overalls is built with support from these organisations. Thank you.</p>
 <dl class="kv sponsors">
-<div><dt><a href="https://antithesis.com">Antithesis <span aria-hidden="true">↗</span></a></dt><dd>Autonomous, deterministic testing that finds the bugs other tests miss.</dd></div>
-<div><dt><a href="https://www.cachix.org">Cachix <span aria-hidden="true">↗</span></a></dt><dd>Binary Nix caching, so builds are fast.</dd></div>
-<div><dt><a href="https://namespace.so">Namespace Labs <span aria-hidden="true">↗</span></a></dt><dd>CI that builds Overalls and publishes the results to Cachix.</dd></div>
+<div><dt><a href="https://antithesis.com/?{UTM}">Antithesis <span aria-hidden="true">↗</span></a></dt><dd>Autonomous, deterministic testing that finds the bugs other tests miss.</dd></div>
+<div><dt><a href="https://www.cachix.org/?{UTM}">Cachix <span aria-hidden="true">↗</span></a></dt><dd>Binary Nix caching, so builds are fast.</dd></div>
+<div><dt><a href="https://namespace.so/?{UTM}">Namespace Labs <span aria-hidden="true">↗</span></a></dt><dd>CI that builds Overalls and publishes the results to Cachix.</dd></div>
 </dl>
 </section>
 
