@@ -90,6 +90,10 @@
 <p>Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
 </article>
 <article class="panel">
+<header><h4>Caching HTTP proxy</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Guest downloads from apt, Nix, pip, npm and the like go through Brady. It fetches only from verified upstreams and caches public, anonymous responses, so the second machine to install a package gets it from the cache.</p>
+</article>
+<article class="panel">
 <header><h4>Locked-down profile</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>For customer material: no outbound network, no sharing, no web exposure, and SSH for the owner only.</p>
 </article>
@@ -180,6 +184,14 @@
 <h3>Running the platform</h3>
 <div class="cols feature-grid">
 <article class="panel">
+<header><h4>Node maintenance</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Take a Lilly host out of service without losing anyone's work. Evacuation moves its machines to other Lilly hosts one at a time; each keeps its identity, disk, sharing and address, and you approve any long downtime first. A drain stops machines in place instead. When the host is empty you can bring it back or retire it.</p>
+</article>
+<article class="panel">
+<header><h4>Off-site backups</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Restic backs up to any S3-compatible bucket: guest disks from native ZFS snapshots, a dump of Marshall's PostgreSQL, host identities and keys. Running guests sync first and are never paused. Built-in checks read the backups back to prove they restore.</p>
+</article>
+<article class="panel">
 <header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
 <p>Several Marshall instances and many Lilly hosts are supported, and failure and recovery have been tested locally. Acceptance testing across hosts and under load is still open.</p>
 </article>
@@ -195,21 +207,24 @@
 <h2 id="how">How it fits together</h2>
 <p>Marshall is the web app and control plane, a Phoenix and Ash application backed by PostgreSQL. Lilly runs on each host. It starts Firecracker guests on ZFS and connects to Marshall over HTTPS to report capacity and receive commands. Porsche handles management over SSH, and Audi serves DNS, guest SSH and web apps. Each guest gets an isolated network, and traffic between guests is blocked.</p>
 <figure class="diagram">
-<pre role="img" aria-label="Browsers reach Marshall through a TLS proxy and SSH management goes through Porsche. Marshall uses PostgreSQL. Each host runs Lilly, which connects to Marshall over HTTPS and runs Firecracker guests. Audi routes guest SSH and web traffic to the hosts."> browser ──HTTPS──▶ proxy ───▶ ┌───────────────┐ ◀──▶ PostgreSQL
- ssh ────manage───▶ Porsche ─▶ │   Marshall    │
-                               │ control plane │
-                               └───────────────┘
-                                       ▲
-                       HTTPS, dialled out by each host
-                                       │
- ssh ─┐                ┌───────────────┴───────────────┐
- web ─┴─▶ Audi ───────▶│  Lilly        one per host    │
-                       │  ┌──────┐  ┌──────┐  ┌──────┐ │
-                       │  │  vm  │  │  vm  │  │  vm  │ │
-                       │  └──────┘  └──────┘  └──────┘ │
-                       │  Firecracker · ZFS · nftables │
-                       └───────────────────────────────┘</pre>
-<figcaption>The request path, simplified. <a href="architecture.html">Full architecture →</a></figcaption>
+<pre role="img" aria-label="Browsers reach Marshall through a TLS proxy and SSH management goes through Porsche. Marshall uses PostgreSQL. Several hosts each run Lilly, which dials out to Marshall over HTTPS and runs Firecracker guests on ZFS. Audi routes guest SSH and web traffic to whichever host runs the guest.">                                ┌───────────────┐ ◀──▶ PostgreSQL
+      browser ─HTTPS─▶ proxy ─▶ │    Marshall   │
+     ssh ──manage──▶ Porsche ─▶ │ control plane │
+                                └───────▲───────┘
+                         HTTPS, dialled out by every host
+            ┌───────────────────────────┼───────────────────────────┐
+ ┌──────────┴─────────┐      ┌──────────┴─────────┐      ┌──────────┴─────────┐
+ │ Lilly · host 1     │      │ Lilly · host 2     │      │ Lilly · host N     │
+ │ ┌────┐┌────┐┌────┐ │      │ ┌────┐┌────┐       │      │ ┌────┐┌────┐┌────┐ │
+ │ │ vm ││ vm ││ vm │ │      │ │ vm ││ vm │       │  ··  │ │ vm ││ vm ││ vm │ │
+ │ └────┘└────┘└────┘ │      │ └────┘└────┘       │      │ └────┘└────┘└────┘ │
+ │ Firecracker · ZFS  │      │ Firecracker · ZFS  │      │ Firecracker · ZFS  │
+ └──────────▲─────────┘      └──────────▲─────────┘      └──────────▲─────────┘
+            └───────────────────────────┬───────────────────────────┘
+                                        │
+ssh · web ────────────────────▶ Audi ───┘  routes each request to the
+                                           host running that guest</pre>
+<figcaption>One control plane, many hosts. Add a host and Marshall starts placing machines on it. <a href="architecture.html">Full architecture →</a></figcaption>
 </figure>
 </section>
 
