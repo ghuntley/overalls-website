@@ -96,7 +96,7 @@
 <section aria-labelledby="planes">
 <h2 id="planes">Control plane and hosts</h2>
 <div class="prose">
-<p>You can run one to a hundred Marshall instances against a shared PostgreSQL. Machine capacity is admitted atomically, so concurrent requests can't overbook a host. Every lifecycle change is a durable operation with an audit trail. Each host's Lilly dials out to Marshall with its own revocable credential, sends capacity reports and receives commands. A generation fence stops a delayed launch from starting a guest after a stop has already been requested.</p>
+<p>You can run multiple Marshall instances against a shared PostgreSQL. Machine capacity is admitted atomically, so concurrent requests can't overbook a host. Every lifecycle change is a durable operation with an audit trail. Each host's Lilly dials out to Marshall with its own revocable credential, sends capacity reports and receives commands. A generation fence stops a delayed launch from starting a guest after a stop has already been requested.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="Browsers go through HAProxy to one or more Marshall instances. SSH and the CLI go through Porsche. Marshall uses PostgreSQL. Several Lilly hosts each connect to Marshall over HTTPS to send reports and receive commands.">                 ┌──────────────────────────────────────────┐

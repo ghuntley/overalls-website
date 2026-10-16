@@ -107,7 +107,7 @@ FEATURES = [
      "A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. "
      "Useful for working on Overalls with Overalls."),
     ("Multi-host fleet and HA", "stable",
-     "Run up to a hundred Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly "
+     "Run multiple Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly "
      "hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions "
      "and sharing recover on the others. Each host keeps itself up to date from Git."),
 ]
@@ -447,7 +447,7 @@ def architecture():
 <section aria-labelledby="planes">
 <h2 id="planes">Control plane and hosts</h2>
 <div class="prose">
-<p>You can run one to a hundred Marshall instances against a shared PostgreSQL. Machine capacity is admitted atomically, so concurrent requests can't overbook a host. Every lifecycle change is a durable operation with an audit trail. Each host's Lilly dials out to Marshall with its own revocable credential, sends capacity reports and receives commands. A generation fence stops a delayed launch from starting a guest after a stop has already been requested.</p>
+<p>You can run multiple Marshall instances against a shared PostgreSQL. Machine capacity is admitted atomically, so concurrent requests can't overbook a host. Every lifecycle change is a durable operation with an audit trail. Each host's Lilly dials out to Marshall with its own revocable credential, sends capacity reports and receives commands. A generation fence stops a delayed launch from starting a guest after a stop has already been requested.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="Browsers go through HAProxy to one or more Marshall instances. SSH and the CLI go through Porsche. Marshall uses PostgreSQL. Several Lilly hosts each connect to Marshall over HTTPS to send reports and receive commands.">{ARCH_CONTROL}</pre>
