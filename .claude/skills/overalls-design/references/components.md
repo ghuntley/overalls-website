@@ -8,7 +8,7 @@ when the recipe uses one.
 See `../assets/page-template.html`. In order:
 
 1. `<head>`: charset, viewport, title, description, `color-scheme`, OG tags, favicon,
-   font preload, `site.css`, and `site.js` in head without `defer`.
+   font preloads (500, 600 and 800 weights), `site.css`, and `site.js` in head without `defer`.
 2. `<div class="public-page">`, then the skip link, header, `<main id="main-content">` and footer.
 
 Titles use the form `Page · Overalls`. The home page title is `Overalls: an AI-first developer platform that you own`.
