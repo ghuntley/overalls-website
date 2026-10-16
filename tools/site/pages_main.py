@@ -253,7 +253,7 @@ def landing():
 <span class="prompt">$ </span>ssh &lt;gateway&gt; clone scratch --name scratch-copy --request-id copy-1 --no-wait
 <span class="prompt">$ </span>ssh &lt;gateway&gt; share add scratch colleague@example.com operator
 <span class="prompt">$ </span>overalls open https://github.com/OWNER/REPO</pre>
-<p class="muted"><code>&lt;gateway&gt;</code> is the SSH host name of your own Porsche gateway. See <a href="self-host/first-machine.html">your first machine</a>.</p>
+<p class="muted"><code>&lt;gateway&gt;</code> is your own deployment's domain: Porsche listens on port 22 of your Marshall hosts. See <a href="self-host/first-machine.html">your first machine</a>.</p>
 </section>
 
 <section aria-labelledby="run">

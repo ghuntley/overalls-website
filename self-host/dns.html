@@ -132,7 +132,7 @@
 <tr><td class="nowrap"><code>apps.&lt;your-domain&gt;</code></td><td>NS</td><td><code>ns1.&lt;your-domain&gt;</code>, <code>ns2.&lt;your-domain&gt;</code>, and any others</td></tr>
 </tbody>
 </table>
-<p>Keep the apex records at your provider. Audi serves only the delegated subzone and never answers for the apex. With several Marshall hosts behind one name, a certificate challenge can arrive at any of them, so list the other frontends as <code>services.marshallProxy.acme.http01.peers</code> on each one (see <a href="deploy.html">Deploy the control plane</a>).</p>
+<p>Porsche, the SSH gateway, runs on the Marshall hosts and answers on port 22 of these same apex addresses, so <code>ssh &lt;your-domain&gt;</code> reaches it with no extra records. Keep the apex records at your provider. Audi serves only the delegated subzone and never answers for the apex. With several Marshall hosts behind one name, a certificate challenge can arrive at any of them, so list the other frontends as <code>services.marshallProxy.acme.http01.peers</code> on each one (see <a href="deploy.html">Deploy the control plane</a>).</p>
 
 <h2>3. Enable Audi DNS</h2>
 <pre data-copy>services.audiDns = {

@@ -267,7 +267,7 @@ def dns():
 <tr><td class="nowrap"><code>apps.&lt;your-domain&gt;</code></td><td>NS</td><td><code>ns1.&lt;your-domain&gt;</code>, <code>ns2.&lt;your-domain&gt;</code>, and any others</td></tr>
 </tbody>
 </table>
-<p>Keep the apex records at your provider. Audi serves only the delegated subzone and never answers for the apex. With several Marshall hosts behind one name, a certificate challenge can arrive at any of them, so list the other frontends as <code>services.marshallProxy.acme.http01.peers</code> on each one (see <a href="deploy.html">Deploy the control plane</a>).</p>
+<p>Porsche, the SSH gateway, runs on the Marshall hosts and answers on port 22 of these same apex addresses, so <code>ssh &lt;your-domain&gt;</code> reaches it with no extra records. Keep the apex records at your provider. Audi serves only the delegated subzone and never answers for the apex. With several Marshall hosts behind one name, a certificate challenge can arrive at any of them, so list the other frontends as <code>services.marshallProxy.acme.http01.peers</code> on each one (see <a href="deploy.html">Deploy the control plane</a>).</p>
 
 <h2>3. Enable Audi DNS</h2>
 {code('''services.audiDns = {
@@ -345,10 +345,27 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' enable HOST_UUID''')}
 ls result/
 # kernel  initrd  rootfs.ext4  manifest.json''')}
 
-<h2>5. Porsche, the SSH gateway</h2>
-<p>Porsche authenticates to Marshall with a gateway token that you prepare and configure using the operator CLI. Before you move Porsche onto port 22, move administrative SSH to another port (the reference fleet uses 2222).</p>
-{sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-prepare /private/porsche.token
-bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-configure edge-one /private/porsche.token''')}
+<h2>5. Porsche on your Marshall hosts</h2>
+<p>Porsche, the SSH gateway, runs on the same hosts as Marshall and listens on port 22 of the same public addresses your apex domain points at. Port 443 on those addresses serves the browser and port 22 serves Porsche, so people manage machines with <code>ssh &lt;your-domain&gt;</code>. There's no separate gateway address or DNS record.</p>
+<ol>
+<li><strong>Move administrative SSH to port 2222 first.</strong> Activate OpenSSH on both 22 and 2222, check that you can log in on 2222 (with sudo if you need it), then activate a configuration without 22. The module refuses to start Porsche on port 22 until administrative SSH is on 2222. From then on, pass <code>--ssh-port 2222</code> to the bootstrap tool.</li>
+<li><strong>Issue a gateway credential for each Porsche host.</strong> Each host gets its own token and gateway name:
+{sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-prepare /private/porsche-host1.token
+bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-configure porsche-host1 /private/porsche-host1.token''')}
+Encrypt the token into that host's <code>porsche</code> secret bundle as <code>PORSCHE_GATEWAY_TOKEN</code>.</li>
+<li><strong>Enable Porsche</strong> alongside Marshall:
+{code('''services.openssh.ports = [ 2222 ];
+services.porsche = {
+  enable = true;
+  controlPlane = "https://example.com";
+  publicOrigin = "https://example.com";
+  credentialFile = "${config.services.kittensSecrets.bundles.porsche.directory}/token";
+  secretUnits = [ config.services.kittensSecrets.bundles.porsche.unit ];
+  openFirewall = true;
+};''')}
+</li>
+</ol>
+<p>Porsche presents an SSH host certificate signed by Marshall's SSH host CA, set with <code>services.marshall.sshHostCa</code>. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
 {ref("provisioner-enrollment.md", "docs/provisioner-enrollment.md")}
 {ref("ubuntu-guests.md", "docs/ubuntu-guests.md")}
 {ref("porsche-operations.md", "docs/porsche-operations.md")}
@@ -358,7 +375,7 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-configure edge-one /p
 
 def first_machine():
     body = f"""<h1>Your first machine</h1>
-<p>Everything on this page happens on <em>your</em> deployment. Replace <code>&lt;your-domain&gt;</code> with Marshall's public host name and <code>&lt;gateway&gt;</code> with your Porsche host name.</p>
+<p>Everything on this page happens on <em>your</em> deployment. Replace <code>&lt;your-domain&gt;</code> with your deployment's domain. <code>&lt;gateway&gt;</code> is the same domain: Porsche listens on port 22 of your Marshall hosts.</p>
 {facts(
     ("Sign in", "<code>https://&lt;your-domain&gt;/sign-in</code>, by magic link; passkeys are also supported"),
     ("Machines", "<code>https://&lt;your-domain&gt;/machines</code>"),
