@@ -843,6 +843,7 @@ dl.kv.stacked > div {
 .public-header .tagline {
   margin: 0;
   color: var(--text-color-alt);
+  text-wrap: balance;
 }
 .public-header th {
   white-space: nowrap;
@@ -979,6 +980,10 @@ blockquote {
 }
 .hero h1 {
   margin: 0 0 var(--line-height);
+  text-wrap: balance;
+}
+.hero h1 .line {
+  display: block;
 }
 .hero .lede {
   font-size: 1rem;
