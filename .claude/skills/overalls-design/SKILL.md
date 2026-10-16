@@ -1,6 +1,6 @@
 ---
 name: overalls-design
-description: The Overalls brand pack and style guide covering the monospace visual system, layout, components, box-drawing diagrams, voice and tone, status labels and the kitten-in-overalls mark. Use when creating or changing any Overalls page, doc, diagram, README, announcement or artifact, when adding a feature card or status label, or when someone asks for "the Overalls look", the monospace style, or the house voice.
+description: The Overalls brand pack and style guide covering the monospace visual system, layout, components, box-drawing diagrams, voice and tone, status labels and the two-kittens-in-overalls mark. Use when creating or changing any Overalls page, doc, diagram, README, announcement or artifact, when adding a feature card or status label, or when someone asks for "the Overalls look", the monospace style, or the house voice.
 ---
 
 # Overalls design system
@@ -27,7 +27,7 @@ already there.
    No other colour exists. State is shown by text, weight or inverse video,
    never by colour alone.
 3. **Text, not pictures.** Icons are Unicode glyphs. Diagrams are box drawing
-   in `<pre>`. The brand mark is a word plus a box-drawn kitten in overalls. No icon sets, no
+   in `<pre>`. The brand mark is a word plus two box-drawn kittens in one pair of overalls. No icon sets, no
    images, no SVG illustrations (the favicon is the only exception).
 4. **Semantic HTML first.** Headings, tables, `dl`, `details`, `figure`, `ol`
    and `ul` are styled at element level. Reach for a class only when an element

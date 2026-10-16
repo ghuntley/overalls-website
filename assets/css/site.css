@@ -974,7 +974,7 @@ blockquote {
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
-  gap: var(--line-height) 4ch;
+  gap: var(--line-height) 3ch;
   align-items: start;
   margin: calc(var(--line-height) * 2) 0 calc(var(--line-height) * 2);
 }
@@ -993,7 +993,11 @@ blockquote {
   margin: 0;
 }
 .mark {
-  line-height: var(--line-height);
+  /* The two-kitten mark is 35 columns wide. Drawn at 0.875rem it leaves the
+     hero headline room for its two lines; line-height in em keeps the box
+     drawing joined at the smaller size. */
+  font-size: .875rem;
+  line-height: 1.2;
   font-weight: var(--font-weight-bold);
   margin: 0;
   overflow: visible;
