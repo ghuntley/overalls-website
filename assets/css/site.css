@@ -1184,6 +1184,12 @@ section > h2::before {
   }
 }
 
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
