@@ -109,9 +109,10 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' enable HOST_UUID</pre>
 <pre data-copy>[
   { name = "NixOS"; package = kittensPackages.guest; standby = true; }
   { name = "Ubuntu 26.04 LTS"; package = kittensPackages.ubuntuGuest; standby = true; }
+  { name = "Windows Server 2025"; package = kittensPackages.windowsGuestAgents; standby = false; }
 ]</pre>
 
-<p>Build a customised image with <code>mkUbuntuGuest</code>, or the NixOS guest builder with <code>extraModules</code>. Pin Ubuntu packages with <code>nix run .#ubuntu-lock</code>. Set <code>services.marshall.defaultImageId</code> to choose the default for new machines.</p>
+<p>The Windows image isn't byte-identical from build to build, so build it once and <code>nix copy</code> it to every host before adding its entry. Build a customised Linux image with <code>mkUbuntuGuest</code>, or the NixOS guest builder with <code>extraModules</code>. Pin Ubuntu packages with <code>nix run .#ubuntu-lock</code>. Set <code>services.marshall.defaultImageId</code> to choose the default for new machines.</p>
 <pre data-copy>nix build .#ubuntu-guest
 ls result/
 <span class="prompt out"># kernel  initrd  rootfs.ext4  manifest.json</span></pre>

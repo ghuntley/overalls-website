@@ -77,11 +77,23 @@
 <div class="cols feature-grid">
 <article class="panel">
 <header><h3>Persistent microVMs</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Each machine is a Firecracker guest with its own kernel and a ZFS disk. Stopping it keeps the disk. Guests run NixOS by default or Ubuntu 26.04 LTS, with disks up to 500 GiB.</p>
+<p>Each machine is a Firecracker guest with its own kernel and a ZFS disk. Stopping it keeps the disk. Disks go up to 500 GiB.</p>
+</article>
+<article class="panel">
+<header><h3>NixOS</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>The default guest. Declarative and reproducible, with Nix and devenv ready for per-project environments. You can build your own variant with extra NixOS modules.</p>
+</article>
+<article class="panel">
+<header><h3>Ubuntu 26.04 LTS</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Built with Nix from pinned package snapshots, so every build of the image is identical. Add your own packages with a lockfile.</p>
+</article>
+<article class="panel">
+<header><h3>Windows Server 2025</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
 </article>
 <article class="panel">
 <header><h3>Tools already installed</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Podman with Docker compatibility, git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv come installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
+<p>Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
 </article>
 <article class="panel">
 <header><h3>Browser terminal</h3><span class="status-label" data-tone="stable">STABLE</span></header>
@@ -104,12 +116,24 @@
 <p>For customer material: no outbound network, no sharing, no web exposure, and SSH for the owner only.</p>
 </article>
 <article class="panel">
-<header><h3>Repo launch links</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
-<p><code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a machine with that repo checked out. A toolbar extension does the same for GitHub, GitLab, Codeberg and Bitbucket; it ships unsigned for now.</p>
+<header><h3>Repo launch links</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p><code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a machine with that repo checked out in <code>/workspace/REPO</code>. If you aren't signed in, the launch picks up again after you sign in.</p>
 </article>
 <article class="panel">
-<header><h3>Public web apps</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<header><h3>Browser extension</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>One toolbar click on a GitHub, GitLab, Codeberg or Bitbucket Cloud repository opens it in a new machine on your deployment. It sends only the repository's origin and path, never page contents. Your deployment serves the Chrome and Firefox packages.</p>
+</article>
+<article class="panel">
+<header><h3>Public web apps</h3><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Each machine can serve HTTPS on its own subdomain under <code>apps.&lt;your-domain&gt;</code>. Audi runs DNS and ingress for this.</p>
+</article>
+<article class="panel">
+<header><h3>Inference without keys</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Guests call <code>https://llm.internal</code> for OpenAI and Anthropic models. Ziggy adds the provider credentials outside the guest and records usage per account, so no API key ever lives in a VM.</p>
+</article>
+<article class="panel">
+<header><h3>Integrations without keys</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Named integrations at <code>&lt;name&gt;.integration.internal</code> let guests call external APIs and peer VMs. Galileo adds the credentials at the edge, so a machine can use a secret without being able to read it.</p>
 </article>
 <article class="panel">
 <header><h3>Agent threads</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
@@ -120,16 +144,8 @@
 <p>A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as you inside the guest. It is verified on NixOS; Ubuntu support is partial.</p>
 </article>
 <article class="panel">
-<header><h3>Inference and integrations without keys</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
-<p>Guests call <code>llm.internal</code> and <code>&lt;name&gt;.integration.internal</code>, and credentials are added at the edge. A machine can use a secret without being able to read it.</p>
-</article>
-<article class="panel">
 <header><h3>Inception</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
 <p>A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. Useful for working on Overalls with Overalls.</p>
-</article>
-<article class="panel">
-<header><h3>Windows guests</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
-<p>Windows Server 2025, booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
 </article>
 <article class="panel">
 <header><h3>Multi-host fleet and HA</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
