@@ -97,6 +97,8 @@ def head(title, description, r, path=None):
 <link rel="icon" type="image/svg+xml" href="{r}favicon.svg">
 <link rel="sitemap" type="application/xml" href="{r}sitemap.xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{r}assets/fonts/jetbrains-mono-500.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{r}assets/fonts/jetbrains-mono-600.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{r}assets/fonts/jetbrains-mono-800.woff2">
 <link rel="stylesheet" href="{r}assets/css/site.css">
 <script src="{r}assets/js/site.js"></script>
 {JSON_LD if path == "" else ""}</head>
