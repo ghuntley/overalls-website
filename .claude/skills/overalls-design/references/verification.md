@@ -37,7 +37,7 @@ left is real, usually an unescaped `<placeholder>` in a `pre`.
 Port 8080 is taken on this machine, so use 8731:
 
 ```sh
-python3 -m http.server 8731 --bind 127.0.0.1 &
+python3 -m http.server 8731 --bind 127.0.0.1 & SERVER=$!
 CH=$(nix shell nixpkgs#chromium -c sh -c 'command -v chromium')
 shot() { $CH --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
   --virtual-time-budget=3000 $3 --window-size=$2 --screenshot=$SCRATCH/$1.png "$4"; }
@@ -45,7 +45,7 @@ shot light   1280,4000 ""                 http://127.0.0.1:8731/index.html
 shot dark    1280,4000 --force-dark-mode  http://127.0.0.1:8731/index.html
 shot mobile  390,3000  ""                 http://127.0.0.1:8731/index.html
 shot hero2x  1280,600  --force-device-scale-factor=2 http://127.0.0.1:8731/index.html
-pkill -f "http.server 8731"
+kill $SERVER   # not pkill -f: it matches this shell's own command line and kills it
 ```
 
 - `--virtual-time-budget` prevents blank captures.
