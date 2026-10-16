@@ -359,6 +359,7 @@ ssh · web ────────────────────▶ Audi 
 <li data-state="current"><span class="step-marker" aria-hidden="true"></span><a href="self-host/index.html">Read the requirements and fork the repo</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/provision.html">Install NixOS on a bare-metal host</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/deploy.html">Deploy Marshall, PostgreSQL, email and TLS</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/dns.html">Point your domain and delegate apps.&lt;your-domain&gt; to Audi</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/enroll.html">Enroll Lilly hosts and publish guest images</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/first-machine.html">Sign in and create your first machine</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/operations.html">Updates, drains, backups and logs</a></li>
@@ -368,7 +369,7 @@ ssh · web ────────────────────▶ Audi 
 <div><dt>Operating system</dt><dd>NixOS 26.05, installed for you from a rescue or Ubuntu system</dd></div>
 <div><dt>Storage</dt><dd>ZFS, which holds the guest disks</dd></div>
 <div><dt>Services</dt><dd>PostgreSQL with TLS, and an authenticated SMTP relay for sign-in links</dd></div>
-<div><dt>Network</dt><dd>A domain you control. Certificates come from ACME, by HTTP-01 or Route 53 DNS-01.</dd></div>
+<div><dt>Network</dt><dd>A domain you control, with <code>apps.&lt;your-domain&gt;</code> delegated to Audi. Certificates come from ACME.</dd></div>
 <div><dt>Your laptop</dt><dd>Nix with flakes, and a Git server your hosts can read from</dd></div>
 </dl>
 </section>

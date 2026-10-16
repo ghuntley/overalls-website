@@ -75,6 +75,7 @@
 <li><a href="index.html" aria-current="page">Overview</a></li>
 <li><a href="provision.html">Provision a host</a></li>
 <li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="dns.html">Set up DNS</a></li>
 <li><a href="enroll.html">Enroll hosts and images</a></li>
 <li><a href="first-machine.html">Your first machine</a></li>
 <li><a href="operations.html">Day-two operations</a></li>
@@ -123,7 +124,7 @@
 <div><dt>Disks</dt><dd>Two system disks on Hetzner, or the root EBS volume on EC2. Guest disks live on native ZFS.</dd></div>
 <div><dt>Database</dt><dd>PostgreSQL, reached over verified TLS</dd></div>
 <div><dt>Email</dt><dd>An SMTP relay with authentication and verified TLS (implicit TLS or STARTTLS), for magic-link sign-in</dd></div>
-<div><dt>DNS</dt><dd>A domain you control. Certificates come from ACME by HTTP-01 (port 80) or Route 53 DNS-01.</dd></div>
+<div><dt>DNS</dt><dd>A domain you control. The apex points at your Marshall hosts and <code>apps.&lt;your-domain&gt;</code> is delegated to Audi. See <a href="dns.html">Set up DNS</a>.</dd></div>
 <div><dt>Laptop</dt><dd>Nix with flakes, a checkout of your fork, and an Ed25519 operator SSH key</dd></div>
 </dl>
 
@@ -133,6 +134,7 @@
 <li data-state="current"><span class="step-marker" aria-hidden="true"></span>Overview and requirements (this page)</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="provision.html">Provision a host</a>: discover, review, plan, install, enroll</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="deploy.html">Deploy the control plane</a>: modules, secrets, database, email, TLS</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="dns.html">Set up DNS</a>: apex records and the Audi delegation</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="enroll.html">Enroll hosts and images</a>: Lilly credentials, guest images, Porsche</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="first-machine.html">Your first machine</a>: sign in, SSH keys, CLI, terminal</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="operations.html">Day-two operations</a>: updates, drains, backups, logs</li>

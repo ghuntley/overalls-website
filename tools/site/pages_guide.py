@@ -61,7 +61,7 @@ def overview():
     ("Disks", "Two system disks on Hetzner, or the root EBS volume on EC2. Guest disks live on native ZFS."),
     ("Database", "PostgreSQL, reached over verified TLS"),
     ("Email", "An SMTP relay with authentication and verified TLS (implicit TLS or STARTTLS), for magic-link sign-in"),
-    ("DNS", "A domain you control. Certificates come from ACME by HTTP-01 (port 80) or Route 53 DNS-01."),
+    ("DNS", "A domain you control. The apex points at your Marshall hosts and <code>apps.&lt;your-domain&gt;</code> is delegated to Audi. See <a href=\"dns.html\">Set up DNS</a>."),
     ("Laptop", "Nix with flakes, a checkout of your fork, and an Ed25519 operator SSH key"),
 )}
 
@@ -70,6 +70,7 @@ def overview():
 <li data-state="current"><span class="step-marker" aria-hidden="true"></span>Overview and requirements (this page)</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="provision.html">Provision a host</a>: discover, review, plan, install, enroll</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="deploy.html">Deploy the control plane</a>: modules, secrets, database, email, TLS</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="dns.html">Set up DNS</a>: apex records and the Audi delegation</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="enroll.html">Enroll hosts and images</a>: Lilly credentials, guest images, Porsche</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="first-machine.html">Your first machine</a>: sign in, SSH keys, CLI, terminal</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="operations.html">Day-two operations</a>: updates, drains, backups, logs</li>
@@ -220,6 +221,84 @@ security.acme.acceptTerms = true;''')}
 {ref("production-email.md", "docs/production-email.md")}
 """
     return guide_page("deploy.html", "Deploy the control plane", "Enable Marshall, secrets, PostgreSQL, SMTP and TLS for a self-hosted Overalls.", body)
+
+
+DNS_DIAGRAM = """\
+┌─ your DNS provider · example.com ──────────────┐
+│ example.com        A   one per Marshall host   │
+│ ns1.example.com    A   Audi DNS host 1         │
+│ ns2.example.com    A   Audi DNS host 2         │
+│ ns3, ns4 …         A   optional, up to eight   │
+│ apps.example.com   NS  ns1, ns2 (, ns3, ns4)   │
+└───────────────────────┬────────────────────────┘
+                        │  delegated
+                        ▼
+┌─ Audi DNS · authoritative for apps.example.com ─────────────┐
+│ &lt;machine&gt;.apps.example.com       A    gateway on its host   │
+│                                       TTL up to 20 s        │
+│ _acme-challenge.apps.example.com TXT  wildcard DNS-01       │
+└─────────────────────────────────────────────────────────────┘"""
+
+
+def dns():
+    body = f"""<h1>Set up DNS</h1>
+<p>Overalls uses two kinds of DNS. Your domain's apex stays with your normal DNS provider and points at your Marshall hosts. A subzone, <code>apps.&lt;your-domain&gt;</code>, is delegated to Audi, which answers for every machine's hostname itself. That's what lets a machine move between hosts without you touching DNS.</p>
+{facts(
+    ("You create", "One apex A record per Marshall host, two to eight <code>ns</code> A records, and one NS delegation"),
+    ("Audi serves", "<code>&lt;machine&gt;.apps.&lt;your-domain&gt;</code>, and the wildcard certificate challenge"),
+    ("Ports", "UDP and TCP 53 on each Audi DNS host; 22, 80 and 443 on each Audi gateway"),
+)}
+<figure class="diagram">
+<pre role="img" aria-label="At your DNS provider, example.com has one A record per Marshall host, ns1 and ns2 (optionally up to eight) point at Audi DNS hosts, and apps.example.com is delegated to them with NS records. Audi DNS then answers for each machine's hostname under apps.example.com with the address of the gateway on the host running it, and serves the DNS-01 challenge for Marshall's wildcard certificate.">{DNS_DIAGRAM}</pre>
+<figcaption>The apex stays with your provider; Audi answers for everything under <code>apps</code>.</figcaption>
+</figure>
+
+<h2>1. Choose the Audi DNS hosts</h2>
+<p>Run Audi's authoritative DNS on at least two independent hosts, and at most eight. Each needs a stable public IPv4 address that's reachable on UDP and TCP port 53. In a small fleet these are usually the control-plane hosts. Every Lilly host also runs an Audi gateway, which carries SSH and web traffic to its own machines, but gateways don't need DNS records of their own.</p>
+
+<h2>2. Create the records at your DNS provider</h2>
+<table>
+<thead><tr><th class="width-min">Name</th><th class="width-min">Type</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td class="nowrap"><code>&lt;your-domain&gt;</code></td><td>A</td><td>One record per Marshall host, each with that host's public address. Browsers, sign-in links, HTTP-01 certificates and Porsche all use this name.</td></tr>
+<tr><td class="nowrap"><code>ns1.&lt;your-domain&gt;</code></td><td>A</td><td>The first Audi DNS host</td></tr>
+<tr><td class="nowrap"><code>ns2.&lt;your-domain&gt;</code></td><td>A</td><td>The second Audi DNS host</td></tr>
+<tr><td class="nowrap"><code>ns3</code>, <code>ns4</code> …</td><td>A</td><td>Optional extra Audi DNS hosts, up to eight in total</td></tr>
+<tr><td class="nowrap"><code>apps.&lt;your-domain&gt;</code></td><td>NS</td><td><code>ns1.&lt;your-domain&gt;</code>, <code>ns2.&lt;your-domain&gt;</code>, and any others</td></tr>
+</tbody>
+</table>
+<p>Keep the apex records at your provider. Audi serves only the delegated subzone and never answers for the apex. With several Marshall hosts behind one name, a certificate challenge can arrive at any of them, so list the other frontends as <code>services.marshallProxy.acme.http01.peers</code> on each one (see <a href="deploy.html">Deploy the control plane</a>).</p>
+
+<h2>3. Enable Audi DNS</h2>
+{code('''services.audiDns = {
+  enable = true;
+  zone = "apps.example.com";
+  nameservers = [ "ns1.example.com" "ns2.example.com" ];
+  mailbox = "hostmaster.example.com";
+  controlPlane = "https://example.com";
+  credentialFile = "/run/kittens-secrets/audi-dns/token";
+  openFirewall = true;
+};''')}
+<p>Every Audi DNS host lists the same zone and the same set of nameservers. <code>mailbox</code> is the SOA contact address, written in DNS form. The module refuses fewer than two or more than eight nameservers.</p>
+
+<h2>4. Enroll Audi with Marshall</h2>
+<p>Each Audi DNS server and each gateway authenticates to Marshall with its own token. Issue the tokens with the operator CLI and write them to private files outside your checkout:</p>
+{sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' audi-dns-rotate audi-host1-dns /private/host1-dns.token
+bin/marshall eval 'Marshall.Operations.CLI.main()' audi-gateway-rotate audi-host1 HOST_UUID ADDRESS /private/host1.token''')}
+<p>Check each file with <code>audi-dns-verify</code> or <code>audi-gateway-verify</code>. Then encrypt the tokens into each host's secret documents with <code>nix run .#secrets -- encrypt</code> and run <code>nix run .#secrets -- check</code>. <code>HOST_UUID</code> is the enrolled Lilly host's ID, and <code>ADDRESS</code> is the gateway's public address.</p>
+
+<h2>5. Wildcard certificate</h2>
+<p>Marshall requests one Let's Encrypt certificate for <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it, and Marshall installs the certificate on every gateway. Machine hostnames get HTTPS without any per-machine records.</p>
+
+<h2>6. Validate</h2>
+{sh('''dig @ns1.example.com apps.example.com SOA
+dig @ns2.example.com apps.example.com SOA
+dig +trace apps.example.com NS''')}
+<p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering.</p>
+{ref("audi.md", "docs/audi.md")}
+{ref("fleet-network.md", "docs/fleet-network.md")}
+"""
+    return guide_page("dns.html", "Set up DNS", "Delegate apps.<your-domain> to Audi and create the DNS records a self-hosted Overalls needs.", body)
 
 
 def enroll():

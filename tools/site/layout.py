@@ -33,6 +33,7 @@ GUIDE = [
     ("index.html", "Overview"),
     ("provision.html", "Provision a host"),
     ("deploy.html", "Deploy the control plane"),
+    ("dns.html", "Set up DNS"),
     ("enroll.html", "Enroll hosts and images"),
     ("first-machine.html", "Your first machine"),
     ("operations.html", "Day-two operations"),

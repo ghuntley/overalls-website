@@ -1292,3 +1292,9 @@ dl.kv.sponsors dt {
   background: var(--background-color-alt);
   outline: 2px solid var(--background-color-alt);
 }
+
+/* Diagrams in guide pages use the full prose width. */
+.docs-content figure.diagram {
+  margin-left: 0;
+  margin-right: 0;
+}

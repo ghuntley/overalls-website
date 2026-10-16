@@ -75,6 +75,7 @@
 <li><a href="index.html">Overview</a></li>
 <li><a href="provision.html">Provision a host</a></li>
 <li><a href="deploy.html" aria-current="page">Deploy the control plane</a></li>
+<li><a href="dns.html">Set up DNS</a></li>
 <li><a href="enroll.html">Enroll hosts and images</a></li>
 <li><a href="first-machine.html">Your first machine</a></li>
 <li><a href="operations.html">Day-two operations</a></li>
@@ -180,7 +181,7 @@ security.acme.acceptTerms = true;</pre>
 <p>Serving instances never run migrations when they start. Instead, host enrollment and every automatic update run Marshall's migrations from the candidate release, under a PostgreSQL advisory lock, before the running services are stopped. Migrations must work with every release still serving, and a successful schema change is never rolled back automatically. Incompatible changes need a coordinated upgrade.</p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/nixos.md">docs/nixos.md <span aria-hidden="true">↗</span></a></p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/production-email.md">docs/production-email.md <span aria-hidden="true">↗</span></a></p>
-<nav class="pager" aria-label="Guide pages"><a href="provision.html">← Provision a host</a><a href="enroll.html">Enroll hosts and images →</a></nav>
+<nav class="pager" aria-label="Guide pages"><a href="provision.html">← Provision a host</a><a href="dns.html">Set up DNS →</a></nav>
 </main>
 </div>
 <footer class="site-footer">

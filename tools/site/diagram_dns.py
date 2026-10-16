@@ -1,0 +1,20 @@
+import sys
+import pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / ".claude/skills/overalls-design/scripts"))
+from canvas import Canvas
+c = Canvas(78, 15)
+c.box(0, 0, 50, 7, title="your DNS provider · example.com")
+c.put(1, 2, "example.com        A   one per Marshall host")
+c.put(2, 2, "ns1.example.com    A   Audi DNS host 1")
+c.put(3, 2, "ns2.example.com    A   Audi DNS host 2")
+c.put(4, 2, "ns3, ns4 …         A   optional, up to eight")
+c.put(5, 2, "apps.example.com   NS  ns1, ns2 (, ns3, ns4)")
+c.put(6, 24, "┬")
+c.put(7, 24, "│  delegated")
+c.put(8, 24, "▼")
+c.box(9, 0, 63, 5, title="Audi DNS · authoritative for apps.example.com")
+row = lambda r, n, t, v: c.put(r, 2, f"{n:<33}{t:<5}{v}")
+row(10, "<machine>.apps.example.com", "A", "gateway on its host")
+row(11, "", "", "TTL up to 20 s")
+row(12, "_acme-challenge.apps.example.com", "TXT", "wildcard DNS-01")
+print(c.render())
