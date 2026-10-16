@@ -105,7 +105,7 @@ FEATURES = [
      "read the backups back to prove they restore."),
     ("Inception", "experimental",
      "A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. "
-     "Useful for working on Overalls with Overalls."),
+     "Useful for developing Overalls within Overalls."),
     ("Multi-host fleet and HA", "stable",
      "Run multiple Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly "
      "hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions "
