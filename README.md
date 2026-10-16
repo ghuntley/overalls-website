@@ -9,5 +9,8 @@ Pages: no build step and nothing loaded from other origins.
 - `assets/js/site.js`: optional appearance switch and copy buttons
 - `assets/fonts/`: JetBrains Mono, self-hosted
 
+- `tools/site/`: the Python generator that writes the HTML (see its README)
+- `.claude/skills/overalls-design/`: the Overalls brand pack and style guide, as a Claude Code skill
+
 Preview locally with `python3 -m http.server 8080` and open http://localhost:8080.
 See `NOTICE.md` for third-party licences.
