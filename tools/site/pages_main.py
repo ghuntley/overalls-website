@@ -297,7 +297,7 @@ def landing():
 <h2 id="sponsors">Donors and sponsors</h2>
 <p>Overalls is built with support from these organisations. Thank you.</p>
 <dl class="kv sponsors">
-<div><dt><a href="https://antithesis.com/?{UTM}">Antithesis <span aria-hidden="true">↗</span></a></dt><dd>Autonomous, deterministic testing that finds the bugs other tests miss.</dd></div>
+<div><dt><a href="https://antithesis.com/?{UTM}">Antithesis <span aria-hidden="true">↗</span></a></dt><dd>Autonomous, deterministic testing that finds <a href="https://antithesis.com/blog/2026/time-traveling-agents/?{UTM}">the bugs that AI misses <span aria-hidden="true">↗</span></a>.</dd></div>
 <div><dt><a href="https://www.cachix.org/?{UTM}">Cachix <span aria-hidden="true">↗</span></a></dt><dd>Binary Nix caching, so installation is fast.</dd></div>
 <div><dt><a href="https://namespace.so/?{UTM}">Namespace Labs <span aria-hidden="true">↗</span></a></dt><dd>Fast CI that builds Overalls and publishes the results to Cachix.</dd></div>
 </dl>
