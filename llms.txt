@@ -1,0 +1,22 @@
+# Overalls
+
+> Overalls is an open-source (MIT), self-hosted platform for persistent Firecracker microVM development machines. There is no hosted service; you run it on your own x86_64 bare-metal hardware with NixOS. Source: https://github.com/ghuntley/overalls
+
+## Site
+
+- [Home](https://ghuntley.dev/index.html): what Overalls is, features with status labels (STABLE, PREVIEW, EXPERIMENTAL), FAQ
+- [Architecture](https://ghuntley.dev/architecture.html): components (Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, Lyra), control plane, machine lifecycle, guest edge services
+
+## Self-hosting guide
+
+- [Overview and requirements](https://ghuntley.dev/self-host/index.html)
+- [Provision a host](https://ghuntley.dev/self-host/provision.html): nix run .#host -- discover | plan | install | enroll | verify
+- [Deploy the control plane](https://ghuntley.dev/self-host/deploy.html): NixOS modules, secrets, PostgreSQL, SMTP, TLS
+- [Enroll hosts and images](https://ghuntley.dev/self-host/enroll.html): Lilly credentials, guest images, Porsche gateway
+- [Your first machine](https://ghuntley.dev/self-host/first-machine.html): sign in, SSH keys, CLI, repository launch
+- [Day-two operations](https://ghuntley.dev/self-host/operations.html): updates, drains, relocation, backups, logs
+
+## Repository documentation
+
+- [Operator docs](https://github.com/ghuntley/overalls/tree/main/docs)
+- [Architecture decision records](https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions)

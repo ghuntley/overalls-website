@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploy the control plane · Overalls</title>
+<meta name="description" content="Enable Marshall, secrets, PostgreSQL, SMTP and TLS for a self-hosted Overalls.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Deploy the control plane · Overalls">
+<meta property="og:description" content="Enable Marshall, secrets, PostgreSQL, SMTP and TLS for a self-hosted Overalls.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="provision.html">Provision a host</a></li>
+<li><a href="deploy.html" aria-current="page">Deploy the control plane</a></li>
+<li><a href="enroll.html">Enroll hosts and images</a></li>
+<li><a href="first-machine.html">Your first machine</a></li>
+<li><a href="operations.html">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Deploy the control plane</h1>
+<p>Marshall and Lilly are NixOS modules exported by the flake. Enabling one doesn't enable the other. The host's <code>configuration.nix</code> chooses its roles, and secrets arrive as encrypted documents that are decrypted on the host.</p>
+<dl class="kv">
+<div><dt>Modules</dt><dd><code>nixosModules.default</code>, or <code>marshall</code>, <code>lilly</code>, <code>proxy</code>, <code>acme</code>, <code>secrets</code> and <code>backups</code> individually</dd></div>
+<div><dt>Target</dt><dd><code>x86_64-linux</code>, NixOS 26.05</dd></div>
+<div><dt>Status</dt><dd><span class="status-label" data-tone="preview">PREVIEW</span> A three-Marshall, two-Lilly fleet passes in local VMs.</dd></div>
+</dl>
+
+<h2>1. Build and check</h2>
+<pre data-copy>nix build .#marshall .#lilly
+nix build .#checks.x86_64-linux.marshall-release
+nix build .#checks.x86_64-linux.lilly-release
+nix build .#checks.x86_64-linux.module-configuration</pre>
+
+<p>Release builds have no network access, and dependency hashes are pinned. No production secrets are needed to build.</p>
+
+<h2>2. Enable Marshall</h2>
+<pre data-copy>{
+  imports = [ overalls.nixosModules.default ];
+  services.marshall = {
+    enable = true;
+    publicHost = "control.example.com";
+    replicaCount = 3;
+    databaseConnectionBudget = 43;
+    environmentFile = "/run/kittens-secrets/marshall.env";
+    instances.node01 = {
+      port = 4443;
+      certificateFile = "/run/kittens-secrets/backend.crt";
+      keyFile = "/run/kittens-secrets/backend.key";
+    };
+  };
+}</pre>
+
+<p>Here <code>overalls</code> is your flake input for the fork. For a single server, set <code>replicaCount = 1</code> and use local PostgreSQL; that's the supported nonredundant layout (<a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 ↗</a>). With automatic updates enabled, budget at least <code>replicaCount × (poolSize + 3) + 10</code> database connections.</p>
+
+<h2>3. Secrets</h2>
+<p><code>services.kittensSecrets</code> decrypts SOPS documents with the host's SSH-derived age key and publishes them under <code>/run/kittens-secrets/NAME</code>. Encrypt each document to the host and to your recovery users:</p>
+<pre data-copy>services.kittensSecrets = {
+  enable = true;
+  bundles.marshall = {
+    encryptedFile = "${./secrets/marshall.enc.json}";
+    outputs.environment = {
+      format = "environment";
+      secrets = [
+        "DATABASE_URL" "MARSHALL_CLOAK_KEYS" "SECRET_KEY_BASE"
+        "TOKEN_SIGNING_SECRET" "MARSHALL_SMTP_HOST" "MARSHALL_SMTP_USERNAME"
+        "MARSHALL_SMTP_PASSWORD" "MARSHALL_SMTP_CA_CERTFILE" "MARSHALL_MAIL_FROM"
+      ];
+    };
+  };
+};
+services.marshall = {
+  environmentFile = "${config.services.kittensSecrets.bundles.marshall.directory}/environment";
+  secretUnits = [ config.services.kittensSecrets.bundles.marshall.unit ];
+};</pre>
+
+<pre data-copy>nix build .#user-recipients --out-link result-recipient
+nix run .#secrets -- check</pre>
+
+
+<h2>4. Database and email</h2>
+<table>
+<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>DATABASE_URL</code></td><td>PostgreSQL, reached over verified TLS, shared by every Marshall</td></tr>
+<tr><td><code>SECRET_KEY_BASE</code>, <code>TOKEN_SIGNING_SECRET</code></td><td>Shared signing secrets</td></tr>
+<tr><td><code>MARSHALL_CLOAK_KEYS</code></td><td>Encryption keyring. Keep old keys as long as data encrypted with them still exists.</td></tr>
+<tr><td><code>MARSHALL_SMTP_HOST</code> · <code>_USERNAME</code> · <code>_PASSWORD</code></td><td>Your relay. Plaintext SMTP isn't supported.</td></tr>
+<tr><td><code>MARSHALL_SMTP_TLS</code></td><td><code>implicit</code> (the default, port 465) or <code>starttls</code> (port 587)</td></tr>
+<tr><td><code>MARSHALL_MAIL_FROM</code></td><td>A verified sender, such as <code>noreply@your-domain.example</code></td></tr>
+<tr><td><code>PHX_HOST</code></td><td>The public host name used in sign-in links</td></tr>
+</tbody>
+</table>
+<p>Marshall won't start if its SMTP configuration is missing or invalid. Send a test to a mailbox you control before you open the deployment to other people.</p>
+
+<h2>5. TLS and certificates</h2>
+<p><code>services.marshallProxy</code> runs HAProxy in front of Marshall and verifies each backend's certificate and host name. The ACME integration issues and renews the public certificate:</p>
+<pre data-copy>services.marshallProxy.acme = {
+  enable = true;
+  email = "operator@example.com";
+};
+# Set only after accepting the selected CA's terms.
+security.acme.acceptTerms = true;</pre>
+
+<p>HTTP-01 needs public DNS pointing at the frontend and port 80 reachable. Use <code>challengeType = "dns-01"</code> with Route 53 when port 80 can't be reachable. If several frontends share one host name, each lists the others as <code>http01.peers</code>.</p>
+
+<h2>6. Migrate, then switch</h2>
+<p>Serving instances never run migrations when they start. Instead, host enrollment and every automatic update run Marshall's migrations from the candidate release, under a PostgreSQL advisory lock, before the running services are stopped. Migrations must work with every release still serving, and a successful schema change is never rolled back automatically. Incompatible changes need a coordinated upgrade.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/nixos.md">docs/nixos.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/production-email.md">docs/production-email.md <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><a href="provision.html">← Provision a host</a><a href="enroll.html">Enroll hosts and images →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

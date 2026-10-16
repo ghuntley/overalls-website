@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture · Overalls</title>
+<meta name="description" content="How Overalls fits together: Marshall, Lilly, Porsche, Audi and the guest-edge services.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Architecture · Overalls">
+<meta property="og:description" content="How Overalls fits together: Marshall, Lilly, Porsche, Audi and the guest-edge services.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="self-host/index.html">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="architecture.html" aria-current="page">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<main id="main-content">
+<div class="prose">
+<h1>Architecture</h1>
+<p>Overalls is a monorepo of small services, each named after something or someone, with one NixOS deployment that wires them together. Marshall holds the record of what should exist. Lilly hosts make it physically true and report back. The other services sit at the edges: SSH, DNS, egress, inference and integrations.</p>
+</div>
+
+<section aria-labelledby="components">
+<h2 id="components">Components</h2>
+<table class="table-stack">
+<thead><tr><th>Name</th><th>Role</th><th>What it gives you</th></tr></thead>
+<tbody>
+<tr><td class="width-min" data-label="Name:"><strong>Marshall</strong><br><code class="muted">marshall/</code></td><td data-label="Role:">Web app and control plane (Elixir, Phoenix, Ash)</td><td class="width-auto" data-label="Gives you:">Accounts with magic links and passkeys, Cedar authorization, machine lifecycle, scheduling, sharing, teams, the browser terminal and agent threads.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Lilly</strong><br><code class="muted">lilly/</code></td><td data-label="Role:">Host provisioner (Elixir)</td><td class="width-auto" data-label="Gives you:">Runs Firecracker guests on ZFS behind jailed, isolated networks, with a durable actor for each VM. Guests keep running when Lilly restarts.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Porsche</strong><br><code class="muted">porsche/</code></td><td data-label="Role:">SSH management gateway</td><td class="width-auto" data-label="Gives you:"><code>ssh &lt;gateway&gt; &lt;command&gt;</code> manages machines with the same account and permissions as the web.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Audi</strong><br><code class="muted">audi/</code></td><td data-label="Role:">DNS and ingress</td><td class="width-auto" data-label="Gives you:">Authoritative DNS, guest SSH, and public HTTPS for each machine's web apps.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Brady</strong><br><code class="muted">brady/</code></td><td data-label="Role:">Egress proxy and cache</td><td class="width-auto" data-label="Gives you:">Guest downloads go through verified upstreams, and public anonymous responses are cached.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Enrico</strong><br><code class="muted">enrico/</code></td><td data-label="Role:">Private GitHub mirror</td><td class="width-auto" data-label="Gives you:">Speeds up checkouts and powers the repository browser.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Galileo</strong><br><code class="muted">galileo/</code></td><td data-label="Role:">Integration gateway</td><td class="width-auto" data-label="Gives you:">Named integrations at <code>&lt;name&gt;.integration.internal</code>; credentials are added at the edge.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Ziggy</strong><br><code class="muted">ziggy/</code></td><td data-label="Role:">Inference proxy</td><td class="width-auto" data-label="Gives you:"><code>llm.internal</code> for guests, with no provider keys inside the VM and usage recorded per account.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Lyra</strong><br><code class="muted">lyra/</code></td><td data-label="Role:">CLI and guest tools (Rust)</td><td class="width-auto" data-label="Gives you:">The <code>overalls</code> CLI: wildcard SSH, <code>open</code> for repos, <code>agent</code> prompts. It also runs the agent's tools inside the guest.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Browser</strong><br><code class="muted">browser/</code></td><td data-label="Role:">Toolbar extension</td><td class="width-auto" data-label="Gives you:">Opens the repository page you're on in your Overalls deployment.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Protocol</strong><br><code class="muted">protocol/</code></td><td data-label="Role:">Shared wire schemas</td><td class="width-auto" data-label="Gives you:">Validates the messages services exchange, so their interfaces stay consistent.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Fleet and Nix</strong><br><code class="muted">fleet/ nix/</code></td><td data-label="Role:">Declarative infrastructure</td><td class="width-auto" data-label="Gives you:">NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section aria-labelledby="planes">
+<h2 id="planes">Control plane and hosts</h2>
+<div class="prose">
+<p>You can run one to a hundred Marshall instances against a shared PostgreSQL. Machine capacity is admitted atomically, so concurrent requests can't overbook a host. Every lifecycle change is a durable operation with an audit trail. Each host's Lilly dials out to Marshall with its own revocable credential, sends capacity reports and receives commands. A generation fence stops a delayed launch from starting a guest after a stop has already been requested.</p>
+</div>
+<figure class="diagram">
+<pre role="img" aria-label="Browsers go through HAProxy to one or more Marshall instances. SSH and the CLI go through Porsche. Marshall uses PostgreSQL. Several Lilly hosts each connect to Marshall over HTTPS to send reports and receive commands.">                 ┌──────────────────────────────────────────┐
+ browser ─HTTPS─▶│ HAProxy  TLS, ACME, verified backends    │
+                 └────────────────────┬─────────────────────┘
+                                      ▼
+ ssh ──────────▶ Porsche ───▶ ┌────────────────┐     ┌────────────┐
+ overalls CLI ──────────────▶ │ Marshall × 1…N │◀───▶│ PostgreSQL │
+                              │ Phoenix · Ash  │     └────────────┘
+                              │ Cedar · Oban   │
+                              └───────▲────────┘
+                                      │ HTTPS, per-host credential
+                                      │ reports up · commands down
+                        ┌─────────────┴─────────────┐
+                 ┌──────┴──────┐             ┌──────┴──────┐
+                 │ Lilly host  │     · · ·   │ Lilly host  │
+                 │ ZFS · KVM   │             │ ZFS · KVM   │
+                 └─────────────┘             └─────────────┘</pre>
+<figcaption>Marshall decides; Lilly does the work and reports back.</figcaption>
+</figure>
+</section>
+
+<section aria-labelledby="lifecycle">
+<h2 id="lifecycle">A machine's life</h2>
+<div class="prose">
+<p>A machine is an identity first and a process second. Its UUID, name, private address, sharing and disk outlive any particular Firecracker process, so stopping, resizing and relocating it don't create a new machine. Cloning does: the copy is private, gets a fresh address and starts without the source's RAM.</p>
+</div>
+<figure class="diagram">
+<pre role="img" aria-label="A new machine goes from pending to running. Running machines can be stopped or resized. Stopped machines can be started, relocated to another host, cloned into a new private machine, or deleted.">  new ─▶ [pending] ─▶ [running] ◀─── start ─── [stopped]
+                        │    │                    ▲  │
+                        │    └─── stop ───────────┘  │
+                        │                            ├─ relocate ─▶ another host
+                     resize                          ├─ clone ────▶ new machine
+           stop · apply · restart                    ├─ resize ───▶ at next boot
+                                                     └─ rm ───────▶ disk deleted</pre>
+<figcaption>Every transition is a durable request with an ID you can retry.</figcaption>
+</figure>
+</section>
+
+<section aria-labelledby="guest">
+<h2 id="guest">From inside a guest</h2>
+<div class="prose">
+<p>Guests reach the outside world only through services that can check, cache and record the traffic. Lateral traffic between guests and to private address ranges is blocked by Lilly's nftables policy. The locked-down customer profile removes outbound networking entirely.</p>
+</div>
+<figure class="diagram">
+<pre role="img" aria-label="Package downloads from a guest go through Brady, git clones through Enrico, inference calls through Ziggy, and integration calls through Galileo, which adds credentials so the guest never sees them.">  ┌─ guest ──────────────────────────┐
+  │  apt · nix · pip · npm ──────────┼──▶ Brady    proxy, cache ──▶ internet
+  │  git clone ──────────────────────┼──▶ Enrico   GitHub mirror
+  │  https://llm.internal ───────────┼──▶ Ziggy    ──▶ OpenAI, Anthropic
+  │  https://x.integration.internal ─┼──▶ Galileo  adds credentials
+  └──────────────────────────────────┘
+    secrets stay outside the guest; usage is recorded per account</pre>
+<figcaption>Credentials are added at the edge, never handed to the guest.</figcaption>
+</figure>
+</section>
+
+<section aria-labelledby="principles">
+<h2 id="principles">Principles</h2>
+<div class="prose">
+<ul>
+<li><strong>Declared, reviewed, then applied.</strong> Hosts, images, users and secret recipients live in Git. Hosts install from a reviewed plan and update from a pinned branch.</li>
+<li><strong>Secrets never travel in the clear.</strong> SOPS and age documents are encrypted to each host's SSH-derived key and to named recovery users. Private keys are generated where they're used.</li>
+<li><strong>Authority is checked at execution time.</strong> Cedar policies are evaluated when each action runs, not when a page was loaded, so revoked access takes effect on pages that are already open.</li>
+<li><strong>Uncertainty is explicit.</strong> If a request might not have reached a host, the system asks for deliberate reconciliation rather than guessing.</li>
+<li><strong>Text over pictures.</strong> The web interface uses the same monospace character grid as this site.</li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="adrs">
+<h2 id="adrs">Decision records</h2>
+<div class="prose">
+<p>Every design decision is written up as an architecture decision record (ADR), with a review recording the evidence. There are over 170 of them. Some good places to start:</p>
+<ul>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0018-persisted-sharing-and-user-machine-access.md">ADR-0018 · Persisted sharing and machine access <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0022-browser-terminal-and-live-login-checks.md">ADR-0022 · Browser terminal and live login checks <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0030-nixos-deployment-and-tls.md">ADR-0030 · NixOS deployment and TLS <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0036-automatic-host-updates.md">ADR-0036 · Automatic host updates <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0043-declarative-host-provisioning.md">ADR-0043 · Declarative host provisioning <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 · Single-host service deployment <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0055-queued-machine-cloning.md">ADR-0055 · Queued machine cloning <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0077-teams-and-shared-resources.md">ADR-0077 · Teams and shared resources <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0128-repository-launch-links.md">ADR-0128 · Repository launch links <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0153-official-source-browser-editor.md">ADR-0153 · Official-source browser editor <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0155-stopped-only-relocation.md">ADR-0155 · Stopped-only relocation <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0161-monospace-web-presentation.md">ADR-0161 · Monospace Web presentation <span aria-hidden="true">↗</span></a></li>
+</ul>
+<p><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">All decision records <span aria-hidden="true">↗</span></a> · <a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/README.md">Implementation status <span aria-hidden="true">↗</span></a></p>
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<p><a href="index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="assets/monospace-web-LICENSE.md">MIT</a>). <a href="llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

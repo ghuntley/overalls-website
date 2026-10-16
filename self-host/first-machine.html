@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first machine · Overalls</title>
+<meta name="description" content="Sign in to your own Overalls deployment, register a key and create a machine.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Your first machine · Overalls">
+<meta property="og:description" content="Sign in to your own Overalls deployment, register a key and create a machine.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="provision.html">Provision a host</a></li>
+<li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="enroll.html">Enroll hosts and images</a></li>
+<li><a href="first-machine.html" aria-current="page">Your first machine</a></li>
+<li><a href="operations.html">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Your first machine</h1>
+<p>Everything on this page happens on <em>your</em> deployment. Replace <code>&lt;your-domain&gt;</code> with Marshall's public host name and <code>&lt;gateway&gt;</code> with your Porsche host name.</p>
+<dl class="kv">
+<div><dt>Sign in</dt><dd><code>https://&lt;your-domain&gt;/sign-in</code>, by magic link; passkeys are also supported</dd></div>
+<div><dt>Machines</dt><dd><code>https://&lt;your-domain&gt;/machines</code></dd></div>
+<div><dt>SSH keys</dt><dd><code>https://&lt;your-domain&gt;/settings/ssh-keys</code></dd></div>
+</dl>
+
+<h2>1. Sign in</h2>
+<p>Enter your email address at <code>/sign-in</code> and follow the link you're sent. Registration is open, and an account is created the first time someone signs in.</p>
+
+<h2>2. Create a machine in the browser</h2>
+<p>On <code>/machines</code>, choose an image and a profile, then create. When the machine is running, its page opens a terminal straight away. Add as many terminals as you need; they stay open when you close the tab.</p>
+
+<h2>3. Register an SSH key</h2>
+<p>Paste one OpenSSH <em>public</em> key (Ed25519, ECDSA, or RSA with at least 2048 bits) on the SSH keys page. To approve a key from the terminal instead, keep an interactive <code>ssh &lt;gateway&gt;</code> session open and follow the short-lived approval link it prints.</p>
+
+<h2>4. Manage machines over SSH</h2>
+<pre data-copy>ssh &lt;gateway&gt; whoami
+ssh &lt;gateway&gt; images
+ssh &lt;gateway&gt; new --name example-machine
+ssh &lt;gateway&gt; ls
+ssh &lt;gateway&gt; stop example-machine
+ssh &lt;gateway&gt; start example-machine</pre>
+
+<p>Every command accepts <code>--json</code>. Commands that change something accept <code>--request-id ID</code>, so retrying after a dropped connection can't do the same thing twice. Stopping keeps the disk; <code>rm</code> deletes it.</p>
+
+<h2>5. Install the CLI</h2>
+<p>Each machine's page has a <strong>Connect from your computer</strong> section with a one-line installer for Linux and macOS (and a PowerShell one for Windows). It sets up wildcard SSH to every machine you can reach. After that:</p>
+<pre data-copy>overalls open https://github.com/OWNER/REPO
+overalls agent --machine &lt;machine-uuid&gt;</pre>
+
+<p><code>open</code> creates a machine, waits for the clone into <code>/workspace/REPO</code>, then opens a shell. <code>agent</code> sends one prompt to the machine's agent threads, after you approve the CLI in the browser.</p>
+
+<h2>6. Launch from a repository page</h2>
+<p>Any supported repository URL, appended to your deployment's address after a <code>#</code>, starts a machine with that repository checked out:</p>
+<pre data-copy>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</pre>
+
+<p>The toolbar extension does the same with one click on GitHub, GitLab, Codeberg and Bitbucket Cloud. It sends only the repository's origin and path, and never page contents. Your deployment serves the unsigned developer packages at <code>/bin/chrome.zip</code> and <code>/bin/firefox.xpi</code>.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/quickstart.md">Getting started <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/commands.md">Command reference <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/automation.md">Automation <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><a href="enroll.html">← Enroll hosts and images</a><a href="operations.html">Day-two operations →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

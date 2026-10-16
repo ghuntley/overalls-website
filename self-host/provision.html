@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provision a host · Overalls</title>
+<meta name="description" content="Install NixOS on a bare-metal Overalls host from a reviewed plan.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Provision a host · Overalls">
+<meta property="og:description" content="Install NixOS on a bare-metal Overalls host from a reviewed plan.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="provision.html" aria-current="page">Provision a host</a></li>
+<li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="enroll.html">Enroll hosts and images</a></li>
+<li><a href="first-machine.html">Your first machine</a></li>
+<li><a href="operations.html">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Provision a host</h1>
+<p>The host tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
+<dl class="kv">
+<div><dt>Commands</dt><dd><code>discover</code> · <code>plan</code> · <code>install</code> · <code>enroll</code> · <code>verify</code></dd></div>
+<div><dt>Inventory</dt><dd><code>fleet/hosts/NAME/host.json</code>, plus an optional <code>configuration.nix</code> for roles</dd></div>
+<div><dt>Status</dt><dd><span class="status-label" data-tone="preview">PREVIEW</span> Physical acceptance on Hetzner and EC2 is still being recorded.</dd></div>
+</dl>
+
+<h2>1. Discover</h2>
+<p>Get the rescue system's Ed25519 host key through a trusted channel and put it in its own known-hosts file. Then record what the machine has:</p>
+<pre data-copy>nix run .#host -- discover --platform hetzner --name example \
+  --target root@HOST --known-hosts /private/rescue-known-hosts \
+  --identity /private/operator-key --output /private/example.candidate.json</pre>
+
+<p>Use <code>--platform ec2</code> for EC2 bare metal. Discovery won't overwrite an existing file. It suggests a network configuration (DHCP on EC2, interface addresses on Hetzner) for you to review.</p>
+
+<h2>2. Review and declare</h2>
+<p>Copy the candidate to <code>fleet/hosts/NAME/host.json</code> and finish it by hand:</p>
+<ul>
+<li>Set <code>reviewed</code> to true once you've checked the hardware, firmware and networking.</li>
+<li>Choose <code>storage.system</code> by disk ID: two physical disks on Hetzner, or the existing root EBS volume on EC2. On EC2, list the local NVMe IDs in <code>storage.guests</code>.</li>
+<li>Give <code>identity.hostId</code> a persistent, nonzero eight-digit hex value. Leave <code>identity.sshKeys</code> empty for now.</li>
+<li>Set <code>budgets.guestCpuCores</code>, <code>guestMemoryMiB</code> and <code>arcMaxMiB</code>, and on Hetzner a reviewed <code>storage.quotaBytes</code>.</li>
+<li>Add your Git server's known-host lines to <code>git.knownHosts</code>. Private keys never go in the declaration.</li>
+</ul>
+<p>If the host will run Lilly, declare that role now (see <a href="enroll.html">enroll hosts</a>), then commit and push to <code>main</code>. Planning only accepts a commit that has been pushed to <code>main</code>.</p>
+
+<h2>3. Plan</h2>
+<pre data-copy>nix run .#host -- plan --host example --revision FULL_COMMIT \
+  --target root@HOST --known-hosts /private/rescue-known-hosts \
+  --identity /private/operator-key --output /private/example.plan.json</pre>
+
+<p>The plan pins the declaration, the authenticated target key, the firmware, the revision, the exact system, disk-layout and kexec paths, and the list of disks it will erase. Read it. Everything is built before anything destructive happens.</p>
+
+<h2>4. Install</h2>
+<pre data-copy>nix run .#host -- install --plan /private/example.plan.json --erase PLAN_SHA256 \
+  --target root@HOST --known-hosts /private/rescue-known-hosts \
+  --identity /private/operator-key</pre>
+
+<p>The installer kexecs into a pinned image, compares the disk inventory again and formats under a lock. It refuses if a device is mounted or a pool is imported. The new host key is generated on the host; only its public half comes back, recorded in <code>PLAN.installed.json</code>. <strong>Keep that file.</strong> An interrupted install never resumes formatting silently.</p>
+
+<h2>5. Enroll and verify</h2>
+<p>Record the installed public key in <code>identity.sshKeys</code> and in a new known-hosts file. Add the Git credential reference <code>secrets/NAME-git.enc.json</code> to <code>credentials</code>, then prepare the encrypted Git bundle. Use your own account name from <code>nix/users.nix</code> in place of <code>YOU</code>:</p>
+<pre data-copy>nix run .#host -- enroll --host example --deploy-key /private/shared-git-key \
+  --root . --target YOU@HOST --known-hosts /private/installed-known-hosts \
+  --identity /private/operator-key</pre>
+
+<p>Push the updated declaration and ciphertext, then activate that exact commit and check it:</p>
+<pre data-copy>nix run .#host -- enroll --host example --revision ENROLLED_FULL_COMMIT \
+  --install-receipt /private/example.plan.json.installed.json \
+  --target YOU@HOST --known-hosts /private/installed-known-hosts \
+  --identity /private/operator-key
+nix run .#host -- verify --target YOU@HOST \
+  --known-hosts /private/installed-known-hosts --identity /private/operator-key</pre>
+
+<p>From here the host polls <code>main</code> every ten seconds, with jitter. Changes to the platform, firmware, disks or identity are rejected by ordinary updates; those need deliberate maintenance.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/host-provisioning.md">docs/host-provisioning.md <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><a href="index.html">← Overview</a><a href="deploy.html">Deploy the control plane →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

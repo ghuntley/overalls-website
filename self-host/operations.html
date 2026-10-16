@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day-two operations · Overalls</title>
+<meta name="description" content="Updates, host drains, relocation, backups and logs for a self-hosted Overalls fleet.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Day-two operations · Overalls">
+<meta property="og:description" content="Updates, host drains, relocation, backups and logs for a self-hosted Overalls fleet.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="provision.html">Provision a host</a></li>
+<li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="enroll.html">Enroll hosts and images</a></li>
+<li><a href="first-machine.html">Your first machine</a></li>
+<li><a href="operations.html" aria-current="page">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Day-two operations</h1>
+<p>Once it's running, a fleet mostly looks after itself: hosts update from Git, back themselves up, and report health. These are the controls you'll use when it doesn't.</p>
+<dl class="kv">
+<div><dt>Updates</dt><dd><code>kittens-auto-update</code>, which every host runs from your <code>main</code> branch</dd></div>
+<div><dt>Hosts</dt><dd>Drain, resume and retire with the Marshall operator CLI</dd></div>
+<div><dt>Backups</dt><dd><code>kittens-backup</code>, restic to S3-compatible storage</dd></div>
+</dl>
+
+<h2>Automatic updates</h2>
+<p>Each host builds a revision once, stages its secrets, applies compatible migrations, switches, and checks health twice, five seconds apart. A failing revision backs off from thirty seconds to fifteen minutes; pushing a fix skips the wait.</p>
+<pre data-copy>sudo kittens-auto-update status
+sudo systemctl start kittens-auto-update.service
+sudo journalctl -u kittens-auto-update.service
+sudo systemctl stop kittens-auto-update.timer   # before manual recovery</pre>
+
+<p>Hosts don't coordinate their restarts with each other. Kernel changes and incompatible schema or protocol changes need planned maintenance.</p>
+
+<h2>Drain a host for maintenance</h2>
+<pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' drain HOST_UUID REQUEST_UUID ops:ticket-123
+bin/marshall eval 'Marshall.Operations.CLI.main()' drain-status REQUEST_UUID
+bin/marshall eval 'Marshall.Operations.CLI.main()' resume-host REQUEST_UUID
+bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre>
+
+<p>Drain before rebooting or replacing a host. Stopping Lilly's VM slice doesn't count as confirmed cleanup. Guests keep running when the Lilly daemon itself restarts.</p>
+
+<h2>Move machines between hosts</h2>
+<p>Owners, managers and team admins can relocate a stopped machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
+
+<h2>Backups</h2>
+<pre data-copy>services.kittensBackups = {
+  enable = true;
+  postgres.enable = true;
+  s3 = {
+    endpoint = "https://objects.example.com";
+    bucket = "node-recovery";
+  };
+};</pre>
+
+<pre data-copy>kittens-backup list
+kittens-backup check
+kittens-backup read-check</pre>
+
+<p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of Marshall's PostgreSQL; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
+<h2>Logs and metrics</h2>
+<p><code>services.kittensLogging</code> sends journals from Marshall, Lilly, Porsche, HAProxy and the system to CloudWatch, OTLP or a fleet log store, with a bounded on-disk queue. Ziggy and Galileo record usage per account.</p>
+
+<h2>Credentials</h2>
+<p>Rotate a Lilly credential with <code>nix run .#host -- rotate-credential</code>, using the same arguments as <code>prepare-enrollment</code>. Rotation revokes the old credential immediately, so deploy the new ciphertext promptly. Signing secrets, the database URL and the active Cloak key can't change through automatic updates; rotating them needs the coordinated procedure.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/host-maintenance.md">docs/host-maintenance.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/backups.md">docs/backups.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/observability.md">docs/observability.md <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><a href="first-machine.html">← Your first machine</a><a href="../architecture.html">Architecture →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

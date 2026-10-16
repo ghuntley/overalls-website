@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overalls: dev machines you own</title>
+<meta name="description" content="Overalls is an open-source, self-hosted platform for persistent Firecracker microVM development machines.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Overalls: dev machines you own">
+<meta property="og:description" content="Overalls is an open-source, self-hosted platform for persistent Firecracker microVM development machines.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="self-host/index.html">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<main id="main-content">
+<div class="hero">
+<div>
+<h1>Dev machines you own.</h1>
+<p class="lede">Overalls runs persistent Firecracker microVMs on hardware you control. Each machine keeps its disk, name and address when you stop, start, resize, clone or move it. You use it from a browser terminal, over SSH or with the <code>overalls</code> CLI.</p>
+<p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
+<div class="row actions">
+<a class="console-button primary" href="self-host/index.html">Self-host it →</a>
+<a class="console-button" href="https://github.com/ghuntley/overalls">Source on GitHub <span aria-hidden="true">↗</span></a>
+</div>
+</div>
+<figure>
+<pre class="mark" aria-hidden="true">    ║        ║
+    ║        ║
+  ┌─■────────■─┐
+  │  ┌──────┐  │
+  │  ├──────┤  │
+  │  └──────┘  │
+┌─┴────────────┴─┐
+│■              ■│
+│      ┌──┐      │
+│      │  │      │
+│      │  │      │
+└──────┘  └──────┘</pre>
+<figcaption>made to get dirty</figcaption>
+</figure>
+</div>
+
+<section aria-labelledby="what">
+<h2 id="what">What you get</h2>
+<p class="legend"><span class="status-label" data-tone="stable">STABLE</span> built and covered by acceptance tests · <span class="status-label" data-tone="preview">PREVIEW</span> works, with rough edges · <span class="status-label" data-tone="experimental">EXPERIMENTAL</span> still being built</p>
+<div class="cols feature-grid">
+<article class="panel">
+<header><h3>Persistent microVMs</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Each machine is a Firecracker guest with its own kernel and a ZFS disk. Stopping it keeps the disk. Guests run NixOS by default or Ubuntu 26.04 LTS, with disks up to 500 GiB.</p>
+</article>
+<article class="panel">
+<header><h3>Tools already installed</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Podman with Docker compatibility, git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv come installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
+</article>
+<article class="panel">
+<header><h3>Browser terminal</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Run many persistent terminals per machine from a browser tab. People you share with start in watch mode and can take control and hand it back.</p>
+</article>
+<article class="panel">
+<header><h3>SSH management</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p><code>ssh &lt;gateway&gt; new</code>, <code>ls</code>, <code>start</code>, <code>stop</code> and <code>rm</code>, with <code>--json</code> and retry-safe request IDs for scripts. One wildcard SSH profile connects you to every guest.</p>
+</article>
+<article class="panel">
+<header><h3>Sharing and teams</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Share a machine as viewer, operator or manager. Revoking access applies even to pages that are already open. Teams share a pool of machines and integrations.</p>
+</article>
+<article class="panel">
+<header><h3>Clone, resize, relocate</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Clone a machine into an independent copy. Resize CPU and memory up or down, and grow the disk. Move a stopped machine to another host; it keeps its name, identity and address.</p>
+</article>
+<article class="panel">
+<header><h3>Locked-down profile</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>For customer material: no outbound network, no sharing, no web exposure, and SSH for the owner only.</p>
+</article>
+<article class="panel">
+<header><h3>Repo launch links</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p><code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a machine with that repo checked out. A toolbar extension does the same for GitHub, GitLab, Codeberg and Bitbucket; it ships unsigned for now.</p>
+</article>
+<article class="panel">
+<header><h3>Public web apps</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p>Each machine can serve HTTPS on its own subdomain under <code>apps.&lt;your-domain&gt;</code>. Audi runs DNS and ingress for this.</p>
+</article>
+<article class="panel">
+<header><h3>Agent threads</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p>Each machine has threads of AI agent work. Sending a prompt wakes a stopped machine, and the agent's tools run inside the guest. You can also prompt from your terminal after approving it in the browser.</p>
+</article>
+<article class="panel">
+<header><h3>Browser editor</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p>A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as you inside the guest. It is verified on NixOS; Ubuntu support is partial.</p>
+</article>
+<article class="panel">
+<header><h3>Inference and integrations without keys</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p>Guests call <code>llm.internal</code> and <code>&lt;name&gt;.integration.internal</code>, and credentials are added at the edge. A machine can use a secret without being able to read it.</p>
+</article>
+<article class="panel">
+<header><h3>Inception</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. Useful for working on Overalls with Overalls.</p>
+</article>
+<article class="panel">
+<header><h3>Windows guests</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>Windows Server 2025, booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
+</article>
+<article class="panel">
+<header><h3>Multi-host fleet and HA</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>Several Marshall instances and many Lilly hosts are supported, and failure and recovery have been tested locally. Acceptance testing across hosts and under load is still open.</p>
+</article>
+</div>
+</section>
+
+<section aria-labelledby="how">
+<h2 id="how">How it fits together</h2>
+<p>Marshall is the web app and control plane, a Phoenix and Ash application backed by PostgreSQL. Lilly runs on each host. It starts Firecracker guests on ZFS and connects to Marshall over HTTPS to report capacity and receive commands. Porsche handles management over SSH, and Audi serves DNS, guest SSH and web apps. Each guest gets an isolated network, and traffic between guests is blocked.</p>
+<figure class="diagram">
+<pre role="img" aria-label="Browsers reach Marshall through a TLS proxy and SSH management goes through Porsche. Marshall uses PostgreSQL. Each host runs Lilly, which connects to Marshall over HTTPS and runs Firecracker guests. Audi routes guest SSH and web traffic to the hosts."> browser ──HTTPS──▶ proxy ───▶ ┌───────────────┐ ◀──▶ PostgreSQL
+ ssh ────manage───▶ Porsche ─▶ │   Marshall    │
+                               │ control plane │
+                               └───────────────┘
+                                       ▲
+                       HTTPS, dialled out by each host
+                                       │
+ ssh ─┐                ┌───────────────┴───────────────┐
+ web ─┴─▶ Audi ───────▶│  Lilly        one per host    │
+                       │  ┌──────┐  ┌──────┐  ┌──────┐ │
+                       │  │  vm  │  │  vm  │  │  vm  │ │
+                       │  └──────┘  └──────┘  └──────┘ │
+                       │  Firecracker · ZFS · nftables │
+                       └───────────────────────────────┘</pre>
+<figcaption>The request path, simplified. <a href="architecture.html">Full architecture →</a></figcaption>
+</figure>
+</section>
+
+<section aria-labelledby="taste">
+<h2 id="taste">A taste</h2>
+<p>Every management command works in the browser, at an interactive SSH prompt or as a one-off <code>ssh</code> command. Add <code>--json</code> when a script is reading the output.</p>
+<pre class="term" data-copy><span class="prompt">$ </span>ssh &lt;gateway&gt; new --name scratch
+<span class="prompt">$ </span>ssh &lt;gateway&gt; ls
+<span class="prompt">$ </span>ssh &lt;gateway&gt; resize scratch --cpu 4 --memory 8192
+<span class="prompt">$ </span>ssh &lt;gateway&gt; clone scratch --name scratch-copy --request-id copy-1 --no-wait
+<span class="prompt">$ </span>ssh &lt;gateway&gt; share add scratch colleague@example.com operator
+<span class="prompt">$ </span>overalls open https://github.com/OWNER/REPO</pre>
+<p class="muted"><code>&lt;gateway&gt;</code> is the SSH host name of your own Porsche gateway. See <a href="self-host/first-machine.html">your first machine</a>.</p>
+</section>
+
+<section aria-labelledby="run">
+<h2 id="run">Run it yourself</h2>
+<p>Overalls is a set of NixOS modules plus tools for installing and enrolling bare-metal hosts. Your fleet is defined in a Git repository: you fork Overalls, declare your hosts, and each host keeps itself up to date from your <code>main</code> branch. You can start with one server and add hosts later.</p>
+<ol class="steps">
+<li data-state="current"><span class="step-marker" aria-hidden="true"></span><a href="self-host/index.html">Read the requirements and fork the repo</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/provision.html">Install NixOS on a bare-metal host</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/deploy.html">Deploy Marshall, PostgreSQL, email and TLS</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/enroll.html">Enroll Lilly hosts and publish guest images</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/first-machine.html">Sign in and create your first machine</a></li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="self-host/operations.html">Updates, drains, backups and logs</a></li>
+</ol>
+<dl class="kv">
+<div><dt>Hardware</dt><dd>x86_64 bare metal with a working <code>/dev/kvm</code>. The host tool can discover Hetzner dedicated and EC2 bare-metal servers.</dd></div>
+<div><dt>Operating system</dt><dd>NixOS 26.05, installed for you from a rescue or Ubuntu system</dd></div>
+<div><dt>Storage</dt><dd>ZFS, which holds the guest disks</dd></div>
+<div><dt>Services</dt><dd>PostgreSQL with TLS, and an authenticated SMTP relay for sign-in links</dd></div>
+<div><dt>Network</dt><dd>A domain you control. Certificates come from ACME, by HTTP-01 or Route 53 DNS-01.</dd></div>
+<div><dt>Your laptop</dt><dd>Nix with flakes, and a Git server your hosts can read from</dd></div>
+</dl>
+</section>
+
+<section aria-labelledby="faq" class="faq">
+<h2 id="faq">Questions</h2>
+<details>
+<summary>Is there a hosted Overalls I can sign up for?</summary>
+<p>No. Overalls is software you run on your own machines, and this site is the project's home page. Any "sign in" mentioned in these docs is your own deployment's sign-in page.</p>
+</details>
+<details>
+<summary>What does it cost?</summary>
+<p>Nothing. It's MIT-licensed; you pay for your own hardware, bandwidth and email relay.</p>
+</details>
+<details>
+<summary>Can I run it on a single server?</summary>
+<p>Yes. A single Marshall instance with local PostgreSQL is a supported deployment, though it has no redundancy (<a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 ↗</a>). You can add Lilly hosts later. A resilient deployment needs independent hosts and a tested plan for database recovery.</p>
+</details>
+<details>
+<summary>Why Firecracker rather than containers?</summary>
+<p>Each machine gets its own kernel, its own disk and an isolated network, so you can run Podman, systemd services or anything else that expects a real Linux machine. A machine with a working setup stays that way between sessions.</p>
+</details>
+<details>
+<summary>Does it need Kubernetes?</summary>
+<p>No. It's NixOS modules, systemd units and a few Elixir and Rust services. Hosts install from a reviewed plan and then poll your Git repository for updates.</p>
+</details>
+<details>
+<summary>Why "Overalls"?</summary>
+<p>They're workwear: what you put on before getting your hands dirty. The first production host was also called <code>overalls</code>, and its sibling is <code>dungarees</code>.</p>
+</details>
+</section>
+</main>
+<footer class="site-footer">
+<p><a href="index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="assets/monospace-web-LICENSE.md">MIT</a>). <a href="llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enroll hosts and images · Overalls</title>
+<meta name="description" content="Register Lilly hosts, publish guest images and configure the Porsche SSH gateway.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Enroll hosts and images · Overalls">
+<meta property="og:description" content="Register Lilly hosts, publish guest images and configure the Porsche SSH gateway.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="provision.html">Provision a host</a></li>
+<li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="enroll.html" aria-current="page">Enroll hosts and images</a></li>
+<li><a href="first-machine.html">Your first machine</a></li>
+<li><a href="operations.html">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Enroll hosts and images</h1>
+<p>A Lilly host only runs guests once Marshall knows about it. Enrolling registers the host as disabled, issues it a revocable credential encrypted to that host, and leaves it to you to enable scheduling.</p>
+<dl class="kv">
+<div><dt>Needs</dt><dd>An installed host with its receipt, and administrative SSH to both the host and a Marshall host</dd></div>
+<div><dt>Credential</dt><dd>Five years by default, revocable at any time, rotated explicitly</dd></div>
+<div><dt>Status</dt><dd><span class="status-label" data-tone="preview">PREVIEW</span></dd></div>
+</dl>
+
+<h2>1. Declare the Lilly role</h2>
+<p>Add this to the host's <code>host.json</code> <em>before</em> installing, so the base system includes the identity helper:</p>
+<pre data-copy>"lilly": {
+  "controlPlane": "https://marshall.example.com",
+  "egressInterface": "eth0",
+  "credentialTtlSeconds": 157680000,
+  "overheads": {"cores": 1, "memoryBytes": 1073741824, "storageBytes": 1073741824}
+}</pre>
+
+<p>Host names for Lilly hosts can be at most 26 characters. Don't set Lilly host or pool IDs by hand; they're generated.</p>
+
+<h2>2. Prepare the enrollment</h2>
+<p>Deploy the Marshall release and its migration first. Then, from your checkout:</p>
+<pre data-copy>nix run .#host -- prepare-enrollment --host NAME --root . \
+  --target admin@installed-host --marshall-target admin@marshall-host \
+  --identity /private/admin-key --known-hosts /private/known-hosts \
+  --install-receipt /private/host-plan.installed.json \
+  --recovery-key /private/recovery-key</pre>
+
+<p>This registers a disabled host and writes the <code>NAME-git</code> and <code>NAME-lilly</code> ciphertext, plus public registration data in <code>lilly.binding</code>. It doesn't commit, push or enable anything. If it's interrupted, run the identical command again; its journal resumes the work without issuing a second credential.</p>
+
+<h2>3. Activate and enable</h2>
+<p>Push the changes and activate the commit with <code>nix run .#host -- enroll --revision …</code>, as in <a href="provision.html">provisioning</a>. Once the host reports ready, enable it from a Marshall host with the operator CLI:</p>
+<pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' show NAME
+bin/marshall eval 'Marshall.Operations.CLI.main()' enable HOST_UUID</pre>
+
+<p>Operator commands run as a separate process with <code>PHX_SERVER=false</code>, never through a serving node's console. They print only public identities.</p>
+
+<h2>4. Guest images</h2>
+<p>Images are Nix builds with immutable <code>sha256:</code> digests. The fleet catalog in <code>fleet/guest-images.nix</code> lists the images each host stages. Pre-created standby disks make creation fast for images marked <code>standby = true</code>:</p>
+<pre data-copy>[
+  { name = "NixOS"; package = kittensPackages.guest; standby = true; }
+  { name = "Ubuntu 26.04 LTS"; package = kittensPackages.ubuntuGuest; standby = true; }
+]</pre>
+
+<p>Build a customised image with <code>mkUbuntuGuest</code>, or the NixOS guest builder with <code>extraModules</code>. Pin Ubuntu packages with <code>nix run .#ubuntu-lock</code>. Set <code>services.marshall.defaultImageId</code> to choose the default for new machines.</p>
+<pre data-copy>nix build .#ubuntu-guest
+ls result/
+<span class="prompt out"># kernel  initrd  rootfs.ext4  manifest.json</span></pre>
+
+
+<h2>5. Porsche, the SSH gateway</h2>
+<p>Porsche authenticates to Marshall with a gateway token that you prepare and configure using the operator CLI. Before you move Porsche onto port 22, move administrative SSH to another port (the reference fleet uses 2222).</p>
+<pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-prepare /private/porsche.token
+bin/marshall eval 'Marshall.Operations.CLI.main()' gateway-configure edge-one /private/porsche.token</pre>
+
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/provisioner-enrollment.md">docs/provisioner-enrollment.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/ubuntu-guests.md">docs/ubuntu-guests.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/porsche-operations.md">docs/porsche-operations.md <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><a href="deploy.html">← Deploy the control plane</a><a href="first-machine.html">Your first machine →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-host · Overalls</title>
+<meta name="description" content="How to run Overalls on your own bare-metal hardware.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Self-host · Overalls">
+<meta property="og:description" content="How to run Overalls on your own bare-metal hardware.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">Dev machines you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html" aria-current="page">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<div class="docs-shell">
+<aside class="docs-nav">
+<nav aria-label="Self-hosting guide">
+<ul class="tree">
+<li><strong>Self-host</strong>
+<ul>
+<li><a href="index.html" aria-current="page">Overview</a></li>
+<li><a href="provision.html">Provision a host</a></li>
+<li><a href="deploy.html">Deploy the control plane</a></li>
+<li><a href="enroll.html">Enroll hosts and images</a></li>
+<li><a href="first-machine.html">Your first machine</a></li>
+<li><a href="operations.html">Day-two operations</a></li>
+</ul>
+</li>
+<li><strong>Reference</strong>
+<ul>
+<li><a href="../architecture.html">Architecture</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+<main id="main-content" class="docs-content prose">
+<h1>Self-host Overalls</h1>
+<p>Overalls runs on hardware you control and nowhere else. This guide covers going from a bare-metal server to signing in and starting your first machine. It's a summary: each page links to the full operator documentation in the repository, which is the source of truth.</p>
+<dl class="kv">
+<div><dt>Audience</dt><dd>Operators who are comfortable with NixOS, SSH and PostgreSQL</dd></div>
+<div><dt>Time</dt><dd>An afternoon for one host, if your DNS and email relay are ready</dd></div>
+<div><dt>Status</dt><dd><span class="status-label" data-tone="preview">PREVIEW</span> One-host and multi-host deployments work. Acceptance testing across hosts and under load is still open.</dd></div>
+</dl>
+
+<h2>What you're building</h2>
+<ul>
+<li><strong>Marshall</strong>: the web app and control plane, behind HAProxy with ACME certificates, using PostgreSQL and an SMTP relay.</li>
+<li><strong>Lilly</strong> on every host: runs Firecracker guests on a ZFS pool.</li>
+<li><strong>Porsche</strong>: the SSH management gateway. <strong>Audi</strong>: DNS, guest SSH and public web apps.</li>
+<li>Optional edge services: Brady (egress cache), Enrico (GitHub mirror), Ziggy (inference) and Galileo (integrations).</li>
+</ul>
+<p>Every role can run on one host. A deployment with redundancy spreads Marshall across at least three hosts with a highly available database.</p>
+
+<h2>Your fleet is a Git repository</h2>
+<p>Hosts don't take commands from your laptop. Each one polls a branch of a Git repository you control, builds the exact revision, applies migrations, switches and checks its own health. So step one is to fork Overalls and make the fleet yours:</p>
+<ol>
+<li>Fork <a href="https://github.com/ghuntley/overalls">github.com/ghuntley/overalls <span aria-hidden="true">↗</span></a> to a Git server your hosts can reach over SSH.</li>
+<li>Replace the example hosts in <code>fleet/hosts/</code> with your own. <code>fleet/hosts/overalls/</code> is a complete, working reference.</li>
+<li>Put your operators and recovery users in <code>nix/users.nix</code>, and the public addresses allowed to reach your fleet in <code>nix/allowed-hosts.nix</code>.</li>
+<li>Commit and push. Encrypted secrets live under <code>secrets/</code>; plaintext never goes in the repo.</li>
+</ol>
+<blockquote><p>Some modules, options and units still use the project's former codename <code>kittens</code>, for example <code>services.kittensAutoUpdate</code>. Type them exactly as shown.</p></blockquote>
+
+<h2>Requirements</h2>
+<dl class="kv">
+<div><dt>Hosts</dt><dd>x86_64 bare metal with a working <code>/dev/kvm</code>. The host tool knows Hetzner dedicated and EC2 bare metal. The target needs root (or passwordless sudo), Python 3, OpenSSH, <code>lsblk</code> and <code>iproute2</code>.</dd></div>
+<div><dt>Disks</dt><dd>Two system disks on Hetzner, or the root EBS volume on EC2. Guest disks live on native ZFS.</dd></div>
+<div><dt>Database</dt><dd>PostgreSQL, reached over verified TLS</dd></div>
+<div><dt>Email</dt><dd>An SMTP relay with authentication and verified TLS (implicit TLS or STARTTLS), for magic-link sign-in</dd></div>
+<div><dt>DNS</dt><dd>A domain you control. Certificates come from ACME by HTTP-01 (port 80) or Route 53 DNS-01.</dd></div>
+<div><dt>Laptop</dt><dd>Nix with flakes, a checkout of your fork, and an Ed25519 operator SSH key</dd></div>
+</dl>
+
+
+<h2>The path</h2>
+<ol class="steps">
+<li data-state="current"><span class="step-marker" aria-hidden="true"></span>Overview and requirements (this page)</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="provision.html">Provision a host</a>: discover, review, plan, install, enroll</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="deploy.html">Deploy the control plane</a>: modules, secrets, database, email, TLS</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="enroll.html">Enroll hosts and images</a>: Lilly credentials, guest images, Porsche</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="first-machine.html">Your first machine</a>: sign in, SSH keys, CLI, terminal</li>
+<li><span class="step-marker" aria-hidden="true"></span><a href="operations.html">Day-two operations</a>: updates, drains, backups, logs</li>
+</ol>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/deployment.md">docs/deployment.md <span aria-hidden="true">↗</span></a></p>
+<nav class="pager" aria-label="Guide pages"><span></span><a href="provision.html">Provision a host →</a></nav>
+</main>
+</div>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>
