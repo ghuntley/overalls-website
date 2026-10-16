@@ -204,6 +204,7 @@
 <div class="prose">
 <ul>
 <li><strong>Declared, reviewed, then applied.</strong> Hosts, images, users and secret recipients live in Git. Hosts install from a reviewed plan and update from a pinned branch.</li>
+<li><strong>Make it your own.</strong> Your fork is yours to change. Patch a component, pin a package or add tools to the guest images with a <a href="https://ghuntley.com/nix/?utm_source=ghuntley&amp;utm_medium=referral&amp;utm_campaign=overalls">Nix overlay <span aria-hidden="true">↗</span></a> rather than carrying a long-lived fork of the code.</li>
 <li><strong>Secrets never travel in the clear.</strong> SOPS and age documents are encrypted to each host's SSH-derived key and to named recovery users. Private keys are generated where they're used.</li>
 <li><strong>Authority is checked at execution time.</strong> Cedar policies are evaluated when each action runs, not when a page was loaded, so revoked access takes effect on pages that are already open.</li>
 <li><strong>Uncertainty is explicit.</strong> If a request might not have reached a host, the system asks for deliberate reconciliation rather than guessing.</li>
