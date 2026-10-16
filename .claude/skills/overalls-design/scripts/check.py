@@ -12,15 +12,15 @@ class P(html.parser.HTMLParser):
         a = dict(a)
         if 'id' in a: s.ids.add(a['id'])
         for k in ('href','src'):
-            if k in a: s.refs.append((tag, k, a[k]))
+            if k in a: s.refs.append((tag, k, a[k], a.get('rel')))
 pages = {}
 def visible(path): return not any(part.startswith('.') for part in path.relative_to(root).parts)
 for f in filter(visible, root.rglob('*.html')):
     p = P(); p.feed(f.read_text()); pages[f] = p
 for f, p in pages.items():
-    for tag, k, v in p.refs:
+    for tag, k, v, rel in p.refs:
         if v.startswith(('http://','https://')):
-            if tag in ('link','script','img') and urllib.parse.urlparse(v).hostname not in ALLOWED_RESOURCE_HOSTS: bad.append(f'{f}: external resource {v}')
+            if tag in ('link','script','img') and rel not in ('canonical', 'alternate') and urllib.parse.urlparse(v).hostname not in ALLOWED_RESOURCE_HOSTS: bad.append(f'{f}: external resource {v}')
             ext.add(v); continue
         u = urllib.parse.urlparse(v)
         if f.name == '404.html' and v.startswith('/'): target = root / u.path.lstrip('/')
