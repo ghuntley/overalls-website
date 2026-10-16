@@ -503,7 +503,6 @@ def architecture():
 <li><strong>Secrets never travel in the clear.</strong> SOPS and age documents are encrypted to each host's SSH-derived key and to named recovery users. Private keys are generated where they're used.</li>
 <li><strong>Authority is checked at execution time.</strong> Cedar policies are evaluated when each action runs, not when a page was loaded, so revoked access takes effect on pages that are already open.</li>
 <li><strong>Uncertainty is explicit.</strong> If a request might not have reached a host, the system asks for deliberate reconciliation rather than guessing.</li>
-<li><strong>Text over pictures.</strong> The web interface uses the same monospace character grid as this site.</li>
 </ul>
 </div>
 </section>
