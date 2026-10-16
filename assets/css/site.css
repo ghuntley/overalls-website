@@ -1222,3 +1222,17 @@ section > h2::before {
     display: none;
   }
 }
+
+/* Donors and sponsors: names in full text colour, not the muted dt default. */
+dl.kv.sponsors > div {
+  grid-template-columns: minmax(20ch, max-content) minmax(0, 1fr);
+}
+dl.kv.sponsors dt {
+  color: var(--text-color);
+}
+@media (max-width: 480px) {
+  dl.kv.sponsors > div {
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: calc(var(--line-height) / 2);
+  }
+}
