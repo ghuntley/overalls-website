@@ -71,8 +71,9 @@ FEATURES = [
      "Each machine can serve HTTPS on its own subdomain under <code>apps.&lt;your-domain&gt;</code>. "
      "Audi runs DNS and ingress for this."),
     ("Agent threads", "stable",
-     "Each machine has threads of AI agent work. Sending a prompt wakes a stopped machine, and the "
-     "agent's tools run inside the guest. You can also prompt from your terminal after approving it in the browser."),
+     "Overalls' built-in agent works in threads on each machine. Sending a prompt wakes a stopped machine, the "
+     "agent's tools run inside the guest, and the work carries on after you close your laptop. It's the Amp orbs "
+     "workflow on your own hardware. You can also prompt from your terminal after approving it in the browser."),
     ("Browser editor", "preview",
      "A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as "
      "you inside the guest. It is verified on NixOS; Ubuntu support is partial."),
@@ -200,7 +201,8 @@ def landing():
 <div>
 <h1>An AI-first developer platform <span class="line">that you own.</span></h1>
 <p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM running NixOS, Ubuntu or Windows, and it keeps its disk, name and address when you stop, start, resize, clone or move it.</p>
-<p class="lede">Claude Code and Codex come pre-installed, with no API keys on the machine and every token accounted for. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Put hosts in every region your team works in.</p>
+<p class="lede">Overalls has its own agent built in: start a thread on any machine from the browser or the CLI, and it keeps working after you close your laptop, waking the machine if it was stopped. It's the Amp orbs workflow on hardware you own.</p>
+<p class="lede">Claude Code and Codex come pre-installed too, with no API keys on the machine and every token accounted for. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Put hosts in every region your team works in.</p>
 <p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
 <div class="row actions">
 <a class="console-button primary" href="self-host/index.html">Self-host it →</a>
