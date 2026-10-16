@@ -179,6 +179,10 @@
 <p>Guests call <code>https://llm.internal</code> for OpenAI and Anthropic models. Ziggy adds the provider credentials outside the guest and records usage per account, so no API key ever lives in a VM.</p>
 </article>
 <article class="panel">
+<header><h4>AI usage accounting</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Inference usage is recorded for each user, down to the machine and agent thread. Everyone can keep an eye on their own usage. Administrators get fleet-wide reports on AI adoption, utilisation and estimated cost, and can export them to reconcile against their inference provider's bills. Usage that wasn't measured shows as unknown, never as zero.</p>
+</article>
+<article class="panel">
 <header><h4>Integrations without keys</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Named integrations at <code>&lt;name&gt;.integration.internal</code> let guests call external APIs and peer VMs. Galileo adds the credentials at the edge, so a machine can use a secret without being able to read it.</p>
 </article>
