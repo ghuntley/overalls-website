@@ -40,4 +40,14 @@
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://ghuntley.dev/security/</loc>
+    <lastmod>2026-10-16</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://ghuntley.dev/security/hall-of-fame/</loc>
+    <lastmod>2026-10-16</lastmod>
+    <priority>0.4</priority>
+  </url>
 </urlset>

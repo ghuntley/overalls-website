@@ -20,3 +20,9 @@
 
 - [Operator docs](https://github.com/ghuntley/overalls/tree/main/docs)
 - [Architecture decision records](https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions)
+
+## Security
+
+- [Vulnerability disclosure policy](https://ghuntley.dev/security/): scope, how to report (GitHub private security advisory), safe harbour
+- [Hall of fame](https://ghuntley.dev/security/hall-of-fame/): researchers credited for responsible disclosure
+- [security.txt](https://ghuntley.dev/.well-known/security.txt)

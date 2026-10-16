@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security · Overalls</title>
+<meta name="description" content="The Overalls vulnerability disclosure policy: scope, how to report, and safe harbour.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Security · Overalls">
+<meta property="og:description" content="The Overalls vulnerability disclosure policy: scope, how to report, and safe harbour.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/jetbrains-mono-500.woff2">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/site.js"></script>
+</head>
+<body>
+<div class="public-page">
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header class="public-header">
+<table class="header">
+<tr>
+<td colspan="2" rowspan="2" class="width-auto">
+<p class="title"><a href="../index.html" class="console-brand">Overalls<span class="brand-dot">.</span></a></p>
+<p class="tagline">An AI-first developer platform that you own.</p>
+</td>
+<th class="width-min">Guide</th>
+<td class="width-min"><a href="../self-host/index.html">Self-host</a></td>
+</tr>
+<tr>
+<th class="width-min">Design</th>
+<td class="width-min"><a href="../architecture.html">Architecture</a></td>
+</tr>
+<tr class="appearance-row">
+<th class="width-min">Source</th>
+<td class="width-auto"><a href="https://github.com/ghuntley/overalls">GitHub <span aria-hidden="true">↗</span></a> · MIT</td>
+<th class="width-min">Appearance</th>
+<td class="width-min"><label class="appearance-control select"><span class="sr-only">Appearance</span><select data-appearance aria-label="Appearance">
+<option value="system">System</option>
+<option value="light">Light</option>
+<option value="dark">Dark</option>
+</select></label></td>
+</tr>
+</table>
+</header>
+<main id="main-content">
+<div class="prose">
+<h1>Security</h1>
+<p>Overalls runs other people's code on other people's hardware, so we take reports of security problems seriously. This is our vulnerability disclosure policy: what's in scope, how to report, and what you can expect from us.</p>
+<dl class="kv">
+<div><dt>Report to</dt><dd><a href="https://github.com/ghuntley/overalls/security/advisories/new">GitHub private security advisory <span aria-hidden="true">↗</span></a></dd></div>
+<div><dt>Reward</dt><dd>Public thanks on the <a href="hall-of-fame/">hall of fame</a> and credit in the advisory. There is no cash bounty.</dd></div>
+<div><dt>Machine-readable</dt><dd><a href="../.well-known/security.txt">/.well-known/security.txt</a></dd></div>
+</dl>
+</div>
+
+<section aria-labelledby="scope">
+<h2 id="scope">In scope</h2>
+<div class="prose">
+<ul>
+<li>The Overalls source code at <a href="https://github.com/ghuntley/overalls">github.com/ghuntley/overalls <span aria-hidden="true">↗</span></a>: Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, the <code>overalls</code> CLI, the browser extension, the NixOS modules, the host tools and the guest images.</li>
+<li>Anything that lets one tenant reach another: escaping a guest, crossing the guest network isolation, reading another account's machines, terminals or usage, or reading secrets that are supposed to stay at the edge.</li>
+<li>This website, <code>ghuntley.dev</code>.</li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="out">
+<h2 id="out">Out of scope</h2>
+<div class="prose">
+<ul>
+<li><strong>Other people's deployments.</strong> There is no hosted Overalls. Every deployment belongs to whoever runs it, and only they can authorise testing it. If you find a problem in someone's deployment that comes from Overalls itself, reproduce it on your own and report it here.</li>
+<li>Third-party services, including GitHub, Ghost and ghuntley.com, Cachix, and AI model providers. Report those to the service.</li>
+<li>Denial of service, load or volumetric testing, spam, social engineering and physical attacks.</li>
+<li>Scanner output without a working proof of concept, and missing headers or best-practice notes on this static site with no demonstrable impact.</li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="how">
+<h2 id="how">How to report</h2>
+<div class="prose">
+<ol>
+<li>Open a <a href="https://github.com/ghuntley/overalls/security/advisories/new">private security advisory <span aria-hidden="true">↗</span></a> on the Overalls repository. Please don't open a public issue or pull request.</li>
+<li>Include the commit or release you tested, how it was deployed, step-by-step reproduction, and what an attacker gains.</li>
+<li>Keep any data you came across private, and don't include other people's data in the report.</li>
+</ol>
+</div>
+</section>
+
+<section aria-labelledby="rules">
+<h2 id="rules">Rules of engagement</h2>
+<div class="prose">
+<ul>
+<li>Test against a deployment you own and run.</li>
+<li>Don't access, change or delete data that isn't yours. Stop and report as soon as you've shown the problem.</li>
+<li>Don't degrade a service for other people.</li>
+<li>Give us a reasonable time to fix the problem before you talk about it publicly. We aim to agree a disclosure date with you, normally within 90 days of the report.</li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="commitments">
+<h2 id="commitments">What you can expect</h2>
+<div class="prose">
+<ul>
+<li>We'll confirm we've received your report and keep you updated as we investigate and fix it.</li>
+<li>We'll publish a GitHub security advisory for confirmed problems, request a CVE where one applies, and credit you unless you'd rather stay anonymous.</li>
+<li>With your permission, we'll add you to the <a href="hall-of-fame/">hall of fame</a>.</li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="harbor">
+<h2 id="harbor">Safe harbour</h2>
+<div class="prose">
+<p>If you research and report in good faith and follow this policy, we consider your research authorised. We won't pursue or support legal action against you for it, and if someone else does, we'll make it clear you acted under this policy. This covers only what we control: the Overalls project and this website. We can't authorise testing of deployments or services that belong to anyone else.</p>
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
+</footer>
+</div>
+</body>
+</html>
