@@ -297,7 +297,7 @@ def landing():
 <dl class="kv sponsors">
 <div><dt><a href="https://antithesis.com/?{UTM}">Antithesis <span aria-hidden="true">↗</span></a></dt><dd>Autonomous, deterministic testing that finds the bugs other tests miss.</dd></div>
 <div><dt><a href="https://www.cachix.org/?{UTM}">Cachix <span aria-hidden="true">↗</span></a></dt><dd>Binary Nix caching, so installation is fast.</dd></div>
-<div><dt><a href="https://namespace.so/?{UTM}">Namespace Labs <span aria-hidden="true">↗</span></a></dt><dd>CI that builds Overalls and publishes the results to Cachix.</dd></div>
+<div><dt><a href="https://namespace.so/?{UTM}">Namespace Labs <span aria-hidden="true">↗</span></a></dt><dd>Fast CI that builds Overalls and publishes the results to Cachix.</dd></div>
 </dl>
 </section>
 
