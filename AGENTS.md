@@ -1,5 +1,13 @@
 # Agent guidance
 
+## Skills
+
+Project skills live in `.claude/skills/`. Load the matching skill before starting the task.
+
+| Skill | Use it for |
+| --- | --- |
+| `overalls-design` | The Overalls brand pack and style guide: monospace visual system, layout, components, box-drawing diagrams, voice and tone, status labels and the kitten mark. Use when creating or changing any page, doc, diagram, README or announcement. |
+
 ## Git workflow
 
 - We don't use pull requests. Commit and push directly to `main`.
