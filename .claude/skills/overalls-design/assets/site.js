@@ -90,8 +90,10 @@
       } catch (error) {
         // Rate limits and outages arrive without CORS headers and surface as a bare
         // network error, so only Ghost's own validation messages are shown verbatim.
-        const reason = error?.fromServer && error.message ? `${error.message.replace(/\.$/, "")}. ` : "ghuntley.com didn't answer. ";
-        say("error", `Couldn't subscribe. ${reason}Try again, or sign up at `, true);
+        const reason = error?.fromServer && error.message
+          ? `${error.message.replace(/\.$/, "")}. `
+          : "The newsletter service didn't respond, possibly because it's limiting sign-ups from your network. Wait a while and ";
+        say("error", `Couldn't subscribe. ${reason}${error?.fromServer ? "Try" : "try"} again, or sign up at `, true);
       } finally {
         form.dataset.state = "";
         button.disabled = false;
