@@ -204,8 +204,8 @@
 <p>Restic backs up to any S3-compatible bucket: guest disks from native ZFS snapshots, a dump of Marshall's PostgreSQL, host identities and keys. Running guests sync first and are never paused. Built-in checks read the backups back to prove they restore.</p>
 </article>
 <article class="panel">
-<header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
-<p>Several Marshall instances and many Lilly hosts are supported, and failure and recovery have been tested locally. Acceptance testing across hosts and under load is still open.</p>
+<header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Run up to a hundred Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions and sharing recover on the others. Each host keeps itself up to date from Git.</p>
 </article>
 <article class="panel">
 <header><h4>Inception</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
