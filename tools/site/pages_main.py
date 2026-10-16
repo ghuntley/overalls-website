@@ -98,7 +98,7 @@ FEATURES = [
      "or retire it."),
     ("Hosts near your developers", "stable",
      "Keep the control plane in one region and put Lilly hosts in Washington DC, London, Singapore or wherever "
-     "your team works. Each host dials out to the control plane, so machines stay close to the people using them."),
+     "your team works."),
     ("Off-site backups", "stable",
      "Restic backs up to any S3-compatible bucket: guest disks from native ZFS snapshots, a dump of Marshall's "
      "PostgreSQL, host identities and keys. Running guests sync first and are never paused. Built-in checks "
