@@ -16,3 +16,20 @@ python3 -I tools/site/check.py .     # check links, anchors, external resources 
 | `diagram_*.py` | Box-drawing diagrams drawn on the skill's character canvas. Run one and paste its output into `pages_main.py`. |
 
 Style, voice and component rules are in `.claude/skills/overalls-design/`.
+
+## Social card
+
+`assets/og.png` (1200×630) is the Open Graph and Twitter image on every page. `og.html` is its
+source. Regenerate it after changing the mark or tagline:
+
+```sh
+python3 -m http.server 8731 --bind 127.0.0.1 & SERVER=$!
+chromium --headless=new --hide-scrollbars --virtual-time-budget=3000 --window-size=1200,630 \
+  --screenshot=assets/og.png http://127.0.0.1:8731/tools/site/og.html
+kill $SERVER
+```
+
+SEO and social tags live in `head()` in `layout.py`. Each page passes its `path`, which becomes its
+canonical URL and `og:url`; `path=None` (the 404 page) means `noindex`. JSON-LD structured data is
+added to the home page only.
+

@@ -104,6 +104,7 @@ def policy():
         "The Overalls vulnerability disclosure policy: scope, how to report, and safe harbour.",
         body,
         r="../",
+        path="security/",
     )
 
 
@@ -139,4 +140,5 @@ def hall_of_fame():
         "Security researchers who have responsibly reported vulnerabilities in Overalls.",
         body,
         r="../../",
+        path="security/hall-of-fame/",
     )

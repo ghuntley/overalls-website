@@ -336,6 +336,7 @@ def landing():
         "Overalls",
         "Overalls is an open-source, self-hosted platform for persistent Firecracker development machines and the AI agents that work on them.",
         body,
+        path="",
     )
 
 
@@ -523,6 +524,7 @@ def architecture():
         "How Overalls fits together: Marshall, Lilly, Porsche, Audi and the guest-edge services.",
         body,
         current="architecture",
+        path="architecture.html",
     )
 
 

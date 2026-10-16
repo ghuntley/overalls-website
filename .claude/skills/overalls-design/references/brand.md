@@ -67,6 +67,19 @@ overalls:
   Another option considered was a tiny kitten peeking out of the bib pocket. Compare drafts by
   rendering them side by side in JetBrains Mono at 2x, never by eye in a terminal.
 
+## Social card
+
+`assets/og.png` is 1200×630, on every page as `og:image` and `twitter:image` (`summary_large_image`).
+It has:
+- a 12px double border
+- the `OVERALLS.` wordmark at 104px, with the muted dot
+- the tagline in uppercase at weight 800
+- the meta line `[RESEARCH PREVIEW] · MIT · overalls.dev`
+- the two-kitten mark on the right
+
+The source is `tools/site/og.html`, and the regeneration command is in `tools/site/README.md`.
+Update it when the mark, tagline or launch status changes.
+
 ## Favicon
 
 `assets/favicon.svg` is a 32×32 monochrome overalls silhouette: straps, bib with pocket, legs. It's

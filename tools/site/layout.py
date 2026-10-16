@@ -39,8 +39,34 @@ GUIDE = [
 ]
 
 
-def head(title, description, r):
+SITE = "https://overalls.dev/"
+OG_IMAGE = SITE + "assets/og.png"
+OG_ALT = "Two kittens in one pair of overalls, drawn in box-drawing characters, beside the words Overalls: an AI-first developer platform that you own."
+
+# Structured data for search engines, on the home page only.
+JSON_LD = """<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [
+ {"@type": "WebSite", "name": "Overalls", "url": "https://overalls.dev/"},
+ {"@type": "SoftwareApplication", "name": "Overalls", "url": "https://overalls.dev/",
+  "description": "An AI-first developer platform that you own: self-hosted Firecracker development machines and the AI agents that work on them.",
+  "applicationCategory": "DeveloperApplication", "operatingSystem": "NixOS (x86_64 bare metal)",
+  "license": "https://opensource.org/licenses/MIT", "codeRepository": "https://github.com/ghuntley/overalls",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "author": {"@type": "Person", "name": "Geoffrey Huntley", "url": "https://ghuntley.com/"}}
+]}
+</script>
+"""
+
+
+def head(title, description, r, path=None):
+    """path is the page's URL path under SITE ("" for home); None means not indexable (404)."""
     full = f"{title} · Overalls" if title != "Overalls" else "Overalls: an AI-first developer platform that you own"
+    url = SITE + path if path is not None else None
+    seo = (
+        f'<link rel="canonical" href="{url}">\n<meta name="robots" content="index, follow">\n'
+        if url else '<meta name="robots" content="noindex">\n'
+    )
+    og_url = f'<meta property="og:url" content="{url}">\n' if url else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -48,15 +74,31 @@ def head(title, description, r):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{full}</title>
 <meta name="description" content="{description}">
-<meta name="color-scheme" content="light dark">
+<meta name="author" content="Geoffrey Huntley">
+{seo}<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:site_name" content="Overalls">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="{full}">
 <meta property="og:description" content="{description}">
-<meta property="og:type" content="website">
+{og_url}<meta property="og:image" content="{OG_IMAGE}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{OG_ALT}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{full}">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="{OG_IMAGE}">
+<meta name="twitter:image:alt" content="{OG_ALT}">
 <link rel="icon" type="image/svg+xml" href="{r}favicon.svg">
+<link rel="sitemap" type="application/xml" href="{r}sitemap.xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{r}assets/fonts/jetbrains-mono-500.woff2">
 <link rel="stylesheet" href="{r}assets/css/site.css">
 <script src="{r}assets/js/site.js"></script>
-</head>
+{JSON_LD if path == "" else ""}</head>
 """
 
 
@@ -112,9 +154,9 @@ def footer(r):
 """
 
 
-def page(title, description, body, r="", current=None):
+def page(title, description, body, r="", current=None, path=None):
     return (
-        head(title, description, r)
+        head(title, description, r, path)
         + '<body>\n<div class="public-page">\n'
         + header(r, current)
         + body
@@ -157,4 +199,5 @@ def guide_page(slug, title, description, body):
         + f'<nav class="pager" aria-label="Guide pages">{prev_link}{next_link}</nav>\n'
         + "</main>\n</div>\n"
     )
-    return page(title, description, nav + main, r=r, current="guide")
+    path = "self-host/" + ("" if slug == "index.html" else slug)
+    return page(title, description, nav + main, r=r, current="guide", path=path)
