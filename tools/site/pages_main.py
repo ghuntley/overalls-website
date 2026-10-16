@@ -288,7 +288,7 @@ def landing():
 <input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
 <button type="submit" class="console-button primary">Subscribe</button>
 </form>
-<p class="newsletter-status muted" role="status" aria-live="polite">Unsubscribe any time. Sent from <a href="https://ghuntley.com/newsletter/">ghuntley.com <span aria-hidden="true">↗</span></a>.</p>
+<p class="newsletter-status muted" role="status" aria-live="polite">Unsubscribe any time. Sent from <a href="https://ghuntley.com/?{UTM}">ghuntley.com <span aria-hidden="true">↗</span></a>.</p>
 </section>
 
 <section aria-labelledby="sponsors">
