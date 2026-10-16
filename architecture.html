@@ -100,7 +100,8 @@
 <h2 id="arch-regions">Regions</h2>
 <div class="prose">
 <p>We recommend running Marshall in a single region. Its instances share one PostgreSQL, and admission, sharing and lifecycle decisions all depend on that database, so keep them close to it. Run several instances in that region for high availability.</p>
-<p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work. SSH and web traffic for a machine enter through Audi on the machine's own host and stay in that region.</p>
+<p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work.</p>
+<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, and public web apps enter through Audi on the machine's own host and stay in that region. The browser terminal and browser editor are relayed through Marshall, over the connection the host dialled out, so they pay the round trip to the control-plane region.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">          ┌─ control plane · one region ───────────────────────────────┐
@@ -123,6 +124,20 @@
       developers in                developers in                developers in
       the Americas                    Europe                    Asia-Pacific</pre>
 <figcaption>One control-plane region, hosts wherever they're needed.</figcaption>
+</figure>
+<figure class="diagram">
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH and VS Code connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
+      │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL            │
+      └───────▲──────────────────────────────────────────────────────▲───────┘
+              │ web terminal and                  relay over HTTPS,  │
+              │ browser editor                 dialled out by Lilly  │
+              │                                                      │
+ ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
+ │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
+ │ browser                 │   direct, same region    │                            │
+ │ ssh, VS Code ───────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ └─────────────────────────┘                          └────────────────────────────┘</pre>
+<figcaption>SSH is direct; the web interface goes by way of the control plane.</figcaption>
 </figure>
 </section>
 

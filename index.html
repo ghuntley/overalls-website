@@ -114,6 +114,18 @@
 <header><h4>Windows Server 2025</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
 </article>
+<article class="panel">
+<header><h4>AlmaLinux</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>A RHEL-compatible guest for teams that build, package and test against Red Hat Enterprise Linux and its rebuilds. Being built now.</p>
+</article>
+<article class="panel">
+<header><h4>FreeBSD</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>FreeBSD guests, so BSD software gets developed and tested on a real FreeBSD kernel rather than emulated in Linux. Being built now.</p>
+</article>
+<article class="panel">
+<header><h4>illumos</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>illumos guests, the open-source descendant of OpenSolaris, for work on Solaris-heritage systems. Being built now.</p>
+</article>
 </div>
 </div>
 <div class="feature-group">
@@ -246,7 +258,7 @@ ssh · web ────────────────────▶ Audi 
 
 <section aria-labelledby="regions">
 <h2 id="regions">Close to your developers</h2>
-<p>Run the control plane in one region and put Lilly hosts wherever your developers are. Marshall and PostgreSQL stay together, with several Marshall instances for high availability. Lilly hosts can go anywhere, for example Washington DC, London and Singapore, and each one dials out to the control plane over HTTPS. SSH and web traffic for a machine go through Audi on that machine's own host, so the people using it get local latency.</p>
+<p>Run the control plane in one region and put Lilly hosts wherever your developers are. Marshall and PostgreSQL stay together, with several Marshall instances for high availability. Lilly hosts can go anywhere, for example Washington DC, London and Singapore, and each one dials out to the control plane over HTTPS.</p>
 <figure class="diagram">
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">          ┌─ control plane · one region ───────────────────────────────┐
           │                                                            │
@@ -268,6 +280,21 @@ ssh · web ────────────────────▶ Audi 
       developers in                developers in                developers in
       the Americas                    Europe                    Asia-Pacific</pre>
 <figcaption>Centralise the control plane; distribute the hosts.</figcaption>
+</figure>
+<p>There are two ways into a machine. <strong>SSH goes direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and a machine's public web apps connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
+<figure class="diagram">
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH and VS Code connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
+      │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL            │
+      └───────▲──────────────────────────────────────────────────────▲───────┘
+              │ web terminal and                  relay over HTTPS,  │
+              │ browser editor                 dialled out by Lilly  │
+              │                                                      │
+ ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
+ │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
+ │ browser                 │   direct, same region    │                            │
+ │ ssh, VS Code ───────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ └─────────────────────────┘                          └────────────────────────────┘</pre>
+<figcaption>For the lowest latency, use SSH or VS Code. The browser is there for when you're away from your laptop.</figcaption>
 </figure>
 </section>
 
