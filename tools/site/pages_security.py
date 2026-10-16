@@ -38,7 +38,7 @@ def policy():
 <h2 id="scope">In scope</h2>
 <div class="prose">
 <ul>
-<li>The Overalls source code at <a href="{SOURCE}">{SOURCE.removeprefix("https://")} <span aria-hidden="true">↗</span></a>: Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, the <code>overalls</code> CLI, the browser extension, the NixOS modules, the host tools and the guest images.</li>
+<li>The Overalls source code at <a href="{SOURCE}">{SOURCE.removeprefix("https://")} <span aria-hidden="true">↗</span></a>: Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, the <code>overalls</code> CLI, the browser extension, the NixOS modules, the bootstrap tool and the guest images.</li>
 <li>Anything that lets one tenant reach another: escaping a guest, crossing the guest network isolation, reading another account's machines, terminals or usage, or reading secrets that are supposed to stay at the edge.</li>
 <li>This website, <code>overalls.dev</code>.</li>
 </ul>

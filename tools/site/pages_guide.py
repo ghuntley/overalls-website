@@ -57,7 +57,7 @@ def overview():
 
 <h2>Requirements</h2>
 {facts(
-    ("Hosts", "x86_64 bare metal with a working <code>/dev/kvm</code>. The host tool knows Hetzner dedicated and EC2 bare metal. The target needs root (or passwordless sudo), Python 3, OpenSSH, <code>lsblk</code> and <code>iproute2</code>."),
+    ("Hosts", "x86_64 bare metal with a working <code>/dev/kvm</code>. The bootstrap tool knows Hetzner dedicated and EC2 bare metal. The target needs root (or passwordless sudo), Python 3, OpenSSH, <code>lsblk</code> and <code>iproute2</code>."),
     ("Disks", "Two system disks on Hetzner, or the root EBS volume on EC2. Guest disks live on native ZFS."),
     ("Database", "PostgreSQL, reached over verified TLS"),
     ("Email", "An SMTP relay with authentication and verified TLS (implicit TLS or STARTTLS), for magic-link sign-in"),
@@ -81,7 +81,7 @@ def overview():
 
 def provision():
     body = f"""<h1>Provision a host</h1>
-<p>The host tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
+<p>The bootstrap tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
 {facts(
     ("Commands", "<code>discover</code> · <code>plan</code> · <code>install</code> · <code>enroll</code> · <code>verify</code>"),
     ("Inventory", "<code>fleet/hosts/NAME/host.json</code>, plus an optional <code>configuration.nix</code> for roles"),

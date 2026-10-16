@@ -92,7 +92,7 @@
 </aside>
 <main id="main-content" class="docs-content prose">
 <h1>Provision a host</h1>
-<p>The host tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
+<p>The bootstrap tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
 <dl class="kv">
 <div><dt>Commands</dt><dd><code>discover</code> · <code>plan</code> · <code>install</code> · <code>enroll</code> · <code>verify</code></dd></div>
 <div><dt>Inventory</dt><dd><code>fleet/hosts/NAME/host.json</code>, plus an optional <code>configuration.nix</code> for roles</dd></div>

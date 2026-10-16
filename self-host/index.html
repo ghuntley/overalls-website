@@ -119,7 +119,7 @@
 
 <h2>Requirements</h2>
 <dl class="kv">
-<div><dt>Hosts</dt><dd>x86_64 bare metal with a working <code>/dev/kvm</code>. The host tool knows Hetzner dedicated and EC2 bare metal. The target needs root (or passwordless sudo), Python 3, OpenSSH, <code>lsblk</code> and <code>iproute2</code>.</dd></div>
+<div><dt>Hosts</dt><dd>x86_64 bare metal with a working <code>/dev/kvm</code>. The bootstrap tool knows Hetzner dedicated and EC2 bare metal. The target needs root (or passwordless sudo), Python 3, OpenSSH, <code>lsblk</code> and <code>iproute2</code>.</dd></div>
 <div><dt>Disks</dt><dd>Two system disks on Hetzner, or the root EBS volume on EC2. Guest disks live on native ZFS.</dd></div>
 <div><dt>Database</dt><dd>PostgreSQL, reached over verified TLS</dd></div>
 <div><dt>Email</dt><dd>An SMTP relay with authentication and verified TLS (implicit TLS or STARTTLS), for magic-link sign-in</dd></div>
