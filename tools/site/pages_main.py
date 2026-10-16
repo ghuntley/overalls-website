@@ -199,7 +199,8 @@ def landing():
 <div class="hero">
 <div>
 <h1>An AI-first developer platform <span class="line">that you own.</span></h1>
-<p class="lede">Overalls runs persistent Firecracker microVMs on hardware you control. Each machine keeps its disk, name and address when you stop, start, resize, clone or move it. You use it from a browser terminal, over SSH or with the <code>overalls</code> CLI.</p>
+<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM running NixOS, Ubuntu or Windows, and it keeps its disk, name and address when you stop, start, resize, clone or move it.</p>
+<p class="lede">Claude Code and Codex come pre-installed, with no API keys on the machine and every token accounted for. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Put hosts in every region your team works in.</p>
 <p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
 <div class="row actions">
 <a class="console-button primary" href="self-host/index.html">Self-host it →</a>
@@ -331,7 +332,7 @@ def landing():
 """
     return page(
         "Overalls",
-        "Overalls is an open-source, self-hosted platform for persistent Firecracker microVM development machines.",
+        "Overalls is an open-source, self-hosted platform for persistent Firecracker development machines and the AI agents that work on them.",
         body,
     )
 
