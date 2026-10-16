@@ -28,7 +28,7 @@ FEATURES = [
      "Being built now."),
     ("Tools already installed", "stable",
      "Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv "
-     "installed. Your Linux login, such as <code>u200001</code>, is the same on every machine."),
+     "installed."),
     ("Browser terminal", "stable",
      "Run many persistent terminals per machine from a browser tab. People you share with start "
      "in watch mode and can take control and hand it back."),
