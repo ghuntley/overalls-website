@@ -52,7 +52,7 @@ def policy():
 <li><strong>Other people's deployments.</strong> There is no hosted Overalls. Every deployment belongs to whoever runs it, and only they can authorise testing it. If you find a problem in someone's deployment that comes from Overalls itself, reproduce it on your own and report it here.</li>
 <li>Third-party services, including GitHub, Ghost and ghuntley.com, Cachix, and AI model providers. Report those to the service.</li>
 <li>Denial of service, load or volumetric testing, spam, social engineering and physical attacks.</li>
-<li>Scanner output without a working proof of concept, and missing headers or best-practice notes on this static site with no demonstrable impact.</li>
+<li>Scanner output without a working proof of concept.</li>
 </ul>
 </div>
 </section>
