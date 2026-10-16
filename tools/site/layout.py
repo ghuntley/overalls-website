@@ -23,6 +23,11 @@ MARK = """\
 └───────┘   └───────┘─────╯
  ╰─●─●─╯     ╰─●─●─╯"""
 
+# Simple Analytics, on every page. The only third-party resource the site loads.
+ANALYTICS = """<script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>
+"""
+
 GUIDE = [
     ("index.html", "Overview"),
     ("provision.html", "Provision a host"),
@@ -104,7 +109,9 @@ def page(title, description, body, r="", current=None):
         + header(r, current)
         + body
         + footer(r)
-        + "</div>\n</body>\n</html>\n"
+        + "</div>\n"
+        + ANALYTICS
+        + "</body>\n</html>\n"
     )
 
 

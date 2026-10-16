@@ -3,6 +3,8 @@ from another origin, and site.css has no colour literals outside the tokens and 
 blocks. Usage: python3 -I check.py SITE_ROOT
 """
 import re, sys, pathlib, html.parser, urllib.parse
+# Third-party hosts pages may load resources from (Simple Analytics).
+ALLOWED_RESOURCE_HOSTS = {'scripts.simpleanalyticscdn.com', 'queue.simpleanalyticscdn.com'}
 root = pathlib.Path(sys.argv[1]); bad = []; ext = set()
 class P(html.parser.HTMLParser):
     def __init__(s): super().__init__(); s.refs=[]; s.ids=set()
@@ -18,7 +20,7 @@ for f in filter(visible, root.rglob('*.html')):
 for f, p in pages.items():
     for tag, k, v in p.refs:
         if v.startswith(('http://','https://')):
-            if tag in ('link','script','img'): bad.append(f'{f}: external resource {v}')
+            if tag in ('link','script','img') and urllib.parse.urlparse(v).hostname not in ALLOWED_RESOURCE_HOSTS: bad.append(f'{f}: external resource {v}')
             ext.add(v); continue
         u = urllib.parse.urlparse(v)
         if f.name == '404.html' and v.startswith('/'): target = root / u.path.lstrip('/')
