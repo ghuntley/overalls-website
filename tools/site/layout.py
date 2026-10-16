@@ -60,13 +60,22 @@ def head(title, description, r):
 """
 
 
+def announcement(r):
+    # Shown above the header on every page until launch.
+    return f"""<aside class="announcement" aria-label="Announcement">
+<span class="status-label" data-tone="experimental">RESEARCH PREVIEW</span>
+<p>Overalls launches on <time datetime="2026-11-03">3 November 2026</time>. <a href="{r}index.html#newsletter">Get notified →</a></p>
+</aside>
+"""
+
+
 def header(r, current):
     def link(href, label, key):
         cur = ' aria-current="page"' if key == current else ""
         return f'<a href="{r}{href}"{cur}>{label}</a>'
 
     return f"""<a href="#main-content" class="skip-link">Skip to content</a>
-<header class="public-header">
+{announcement(r)}<header class="public-header">
 <table class="header">
 <tr>
 <td colspan="2" rowspan="2" class="width-auto">

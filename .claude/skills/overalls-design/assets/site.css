@@ -1268,3 +1268,20 @@ dl.kv.sponsors dt {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Announcement callout above the header on every page. */
+.announcement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 2ch;
+  border: var(--border-thickness) dashed var(--text-color);
+  padding: calc(var(--line-height) / 2 - var(--border-thickness)) calc(2ch - var(--border-thickness));
+  margin-bottom: var(--line-height);
+}
+.announcement p {
+  margin: 0;
+}
+.announcement time {
+  font-weight: var(--font-weight-bold);
+}

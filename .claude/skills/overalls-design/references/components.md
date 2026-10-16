@@ -13,6 +13,20 @@ See `../assets/page-template.html`. In order:
 
 Titles use the form `Page · Overalls`. The home page title is `Overalls: an AI-first developer platform that you own`.
 
+## Announcement banner (every page, above the header)
+
+```html
+<aside class="announcement" aria-label="Announcement">
+<span class="status-label" data-tone="experimental">RESEARCH PREVIEW</span>
+<p>Overalls launches on <time datetime="2026-11-03">3 November 2026</time>. <a href="index.html#newsletter">Get notified →</a></p>
+</aside>
+```
+
+- It's a dashed 2px box, half a line of padding top and bottom, with an inverse-video label and a
+  bold `<time>`.
+- Keep it to one sentence plus one link, so it fits on one line at desktop width.
+- `announcement()` in `tools/site/layout.py` renders it. Change or remove it there after launch.
+
 ## Header (every page)
 
 ```html
