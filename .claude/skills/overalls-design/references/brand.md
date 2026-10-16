@@ -21,27 +21,27 @@ Overalls grew out of Kittens, so the mark is two kittens squeezed side by side i
 overalls:
 
 ```
-   ╱╲     ╱╲   ╱╲     ╱╲
-  ╱  ╲───╱  ╲ ╱  ╲───╱  ╲
-  │  ●     ● │ │ ●     ●  │
-  │ ═   ▾   ═│ │═   ▾   ═ │
-  │    ╰┴╯   │ │   ╰┴╯    │
-   ╲─┬─────┬╱   ╲┬─────┬─╱
-  ┌──■─────■─────■─────■──┐
- ╭┤      ┌─────────┐      ├╮
- ││      ├─────────┤      ││
- ●│      └─────────┘      │●
-┌─┴───────────────────────┴─┐
-│■                         ■│
-│           ┌───┐           │   ╭─╮
-│           │   │           │   │ │
-│           │   │           ├───╯ │
-└───────────┘   └───────────┘─────╯
- ╰──●─●──╯         ╰──●─●──╯
+    ╱╲     ╱╲     ╱╲     ╱╲
+   ╱  ╲───╱  ╲   ╱  ╲───╱  ╲
+  │  ●     ●  │ │  ●     ●  │
+  │ ═   ▾   ═ │ │ ═   ▾   ═ │
+  │ ═  ╰┴╯  ═ │ │ ═  ╰┴╯  ═ │
+   ╲─┬─────┬─╱   ╲─┬─────┬─╱
+  ┌──■─────■───────■─────■──┐
+ ╭┤       ┌─────────┐       ├╮
+ ││       ├─────────┤       ││
+ ●│       └─────────┘       │●
+┌─┴─────────────────────────┴─┐
+│■                           ■│
+│            ┌───┐            │   ╭─╮
+│            │   │            │   │ │
+│            │   │            ├───╯ │
+└────────────┘   └────────────┘─────╯
+  ╰──●─●──╯        ╰──●─●──╯
 ```
 
 - **Parts:**
-  - Two box-drawn heads, leaning in towards each other, each with pointed `╱╲` ears, `●` eyes, a
+  - Two identical box-drawn heads, 13 columns wide so the nose is centred, each with pointed `╱╲` ears, `●` eyes, a
     `▾` nose, an `ω`-shaped mouth (`╰┴╯`) and `═` whiskers.
   - Each kitten's straps (`┬`) run from its chin to its own pair of button rivets (`■`), so the bib
     has four.
@@ -50,8 +50,11 @@ overalls:
   - Waistband side buttons and two legs.
   - A tail curling up behind the right leg.
   - Toe-bean feet: `╰──●─●──╯`.
+  - The first two-kitten version was hand-drawn and its second kitten's ears were a column off,
+    which is why the mark is now generated.
 - **Rendering:** a `<pre class="mark" aria-hidden="true">` inside a `<figure>`, weight 800.
-  - It's 35 columns wide.
+  - It's 37 columns wide, drawn by `tools/site/mark.py` on the character canvas so ears, straps
+    and seams line up. Never hand-edit the art; change the script.
   - In `.mark` it's drawn at `font-size: .875rem` with `line-height: 1.2` (em-relative, so the box
     drawing joins up). That keeps the hero headline on two lines at desktop width next to it.
   - On phones it sits centred above the h1.
@@ -77,7 +80,7 @@ It has:
 - the meta line `[RESEARCH PREVIEW] · MIT · overalls.dev`
 - the two-kitten mark on the right
 
-The source is `tools/site/og.html`, and the regeneration command is in `tools/site/README.md`.
+The source is `tools/site/og.html`, and the regeneration command is in `tools/site/README.md`. On the card the mark is drawn at 19px so the wordmark stays on one line.
 Update it when the mark, tagline or launch status changes.
 
 ## Favicon

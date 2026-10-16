@@ -246,7 +246,7 @@ def landing():
 
 <section aria-labelledby="taste">
 <h2 id="taste">A taste</h2>
-<p>Every management command works in the browser, at an interactive SSH prompt or as a one-off <code>ssh</code> command. Add <code>--json</code> when a script is reading the output.</p>
+<p>Every management command works in the browser, at an interactive SSH prompt or as a one-off <code>ssh</code> command. Add <code>--json</code> when a script (or agent) is reading the output.</p>
 <pre class="term" data-copy><span class="prompt">$ </span>ssh &lt;gateway&gt; new --name scratch
 <span class="prompt">$ </span>ssh &lt;gateway&gt; ls
 <span class="prompt">$ </span>ssh &lt;gateway&gt; resize scratch --cpu 4 --memory 8192
