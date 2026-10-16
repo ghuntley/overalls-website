@@ -33,8 +33,8 @@ already there.
    and `ul` are styled at element level. Reach for a class only when an element
    can't express the layout.
 5. **Nothing from another origin.** Fonts, CSS and JS are served from the site
-   itself. No CDNs and no hosted fonts. The one exception is Simple Analytics
-   (`ANALYTICS` in `tools/site/layout.py`, collecting with Do Not Track respected),
+   itself. No CDNs and no hosted fonts. The one exception is Simple Analytics,
+   served through the `api.ghuntley.com` proxy (`ANALYTICS` in `tools/site/layout.py`),
    which `check.py` allows by host name.
 6. **Honest copy.** Every feature claim is backed by the source repo and carries
    a status label. If the code doesn't do it, the site doesn't say it.

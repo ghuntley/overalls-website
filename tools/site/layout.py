@@ -23,9 +23,10 @@ MARK = """\
 └───────┘   └───────┘─────╯
  ╰─●─●─╯     ╰─●─●─╯"""
 
-# Simple Analytics, on every page. The only third-party resource the site loads.
-ANALYTICS = """<script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
-<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>
+# Simple Analytics through the api.ghuntley.com proxy, on every page. The only
+# resource the site loads from another origin.
+ANALYTICS = """<script data-collect-dnt="true" async src="https://api.ghuntley.com/latest.js"></script>
+<noscript><img src="https://api.ghuntley.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>
 """
 
 GUIDE = [
