@@ -281,9 +281,9 @@ ssh · web ────────────────────▶ Audi 
       the Americas                    Europe                    Asia-Pacific</pre>
 <figcaption>Centralise the control plane; distribute the hosts.</figcaption>
 </figure>
-<p>There are two ways into a machine. <strong>SSH goes direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and a machine's public web apps connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
+<p>There are two ways into a machine. <strong>SSH and shared web apps go direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and the web apps a machine shares connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH and VS Code connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
       │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL            │
       └───────▲──────────────────────────────────────────────────────▲───────┘
               │ web terminal and                  relay over HTTPS,  │
@@ -291,10 +291,11 @@ ssh · web ────────────────────▶ Audi 
               │                                                      │
  ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
  │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
- │ browser                 │   direct, same region    │                            │
- │ ssh, VS Code ───────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ │ browser                 │                          │                            │
+ │ ssh, VS Code,           │   direct, same region    │                            │
+ │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘</pre>
-<figcaption>For the lowest latency, use SSH or VS Code. The browser is there for when you're away from your laptop.</figcaption>
+<figcaption>For the lowest latency, use SSH, VS Code or a shared web app. The browser terminal is there for when you're away from your laptop.</figcaption>
 </figure>
 </section>
 

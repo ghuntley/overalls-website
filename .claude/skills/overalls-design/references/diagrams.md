@@ -63,9 +63,10 @@ traffic to whichever host runs the guest.
       the Americas                    Europe                    Asia-Pacific
 ```
 
-**Two paths to a machine** (`tools/site/diagram_paths.py`). This is the locality story: SSH and
-VS Code go direct to Audi in the same region, while the browser terminal and browser editor are relayed
-through the central control plane. Keep the two paths visibly different (up-and-over versus straight across).
+**Two paths to a machine** (`tools/site/diagram_paths.py`). This is the locality story: SSH, VS Code
+and shared web apps go direct to Audi in the same region, while the browser terminal and browser editor
+are relayed through the central control plane. Keep the two paths visibly different (up-and-over versus
+straight across).
 
 ```
       ┌─ control plane · one region ─────────────────────────────────────────┐
@@ -76,8 +77,9 @@ through the central control plane. Keep the two paths visibly different (up-and-
               │                                                      │
  ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
  │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
- │ browser                 │   direct, same region    │                            │
- │ ssh, VS Code ───────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ │ browser                 │                          │                            │
+ │ ssh, VS Code,           │   direct, same region    │                            │
+ │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘
 ```
 

@@ -151,8 +151,9 @@ PATHS_DIAGRAM = """\
               │                                                      │
  ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
  │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
- │ browser                 │   direct, same region    │                            │
- │ ssh, VS Code ───────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ │ browser                 │                          │                            │
+ │ ssh, VS Code,           │   direct, same region    │                            │
+ │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘"""
 
 LANDING_DIAGRAM = """\
@@ -230,10 +231,10 @@ def landing():
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">{REGIONS_DIAGRAM}</pre>
 <figcaption>Centralise the control plane; distribute the hosts.</figcaption>
 </figure>
-<p>There are two ways into a machine. <strong>SSH goes direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and a machine's public web apps connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
+<p>There are two ways into a machine. <strong>SSH and shared web apps go direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and the web apps a machine shares connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH and VS Code connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
-<figcaption>For the lowest latency, use SSH or VS Code. The browser is there for when you're away from your laptop.</figcaption>
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
+<figcaption>For the lowest latency, use SSH, VS Code or a shared web app. The browser terminal is there for when you're away from your laptop.</figcaption>
 </figure>
 </section>
 
@@ -426,15 +427,15 @@ def architecture():
 <div class="prose">
 <p>We recommend running Marshall in a single region. Its instances share one PostgreSQL, and admission, sharing and lifecycle decisions all depend on that database, so keep them close to it. Run several instances in that region for high availability.</p>
 <p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work.</p>
-<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, and public web apps enter through Audi on the machine's own host and stay in that region. The browser terminal and browser editor are relayed through Marshall, over the connection the host dialled out, so they pay the round trip to the control-plane region.</p>
+<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, and the web apps a machine shares enter through Audi on the machine's own host and stay in that region. The browser terminal and browser editor are relayed through Marshall, over the connection the host dialled out, so they pay the round trip to the control-plane region.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">{REGIONS_DIAGRAM}</pre>
 <figcaption>One control-plane region, hosts wherever they're needed.</figcaption>
 </figure>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH and VS Code connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
-<figcaption>SSH is direct; the web interface goes by way of the control plane.</figcaption>
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
+<figcaption>SSH and shared web apps go direct; the web interface goes by way of the control plane.</figcaption>
 </figure>
 </section>
 
