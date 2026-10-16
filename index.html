@@ -196,16 +196,20 @@
 <h3>Running the platform</h3>
 <div class="cols feature-grid">
 <article class="panel">
+<header><h4>Hosts near your developers</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Keep the control plane in one region and put Lilly hosts in Washington DC, London, Singapore or wherever your team works. Each host dials out to the control plane, so machines stay close to the people using them.</p>
+</article>
+<article class="panel">
+<header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Run up to a hundred Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions and sharing recover on the others. Each host keeps itself up to date from Git.</p>
+</article>
+<article class="panel">
 <header><h4>Node maintenance</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Take a Lilly host out of service without losing anyone's work. Evacuation moves its machines to other Lilly hosts one at a time; each keeps its identity, disk, sharing and address, and you approve any long downtime first. A drain stops machines in place instead. When the host is empty you can bring it back or retire it.</p>
 </article>
 <article class="panel">
 <header><h4>Off-site backups</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Restic backs up to any S3-compatible bucket: guest disks from native ZFS snapshots, a dump of Marshall's PostgreSQL, host identities and keys. Running guests sync first and are never paused. Built-in checks read the backups back to prove they restore.</p>
-</article>
-<article class="panel">
-<header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Run up to a hundred Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions and sharing recover on the others. Each host keeps itself up to date from Git.</p>
 </article>
 <article class="panel">
 <header><h4>Inception</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
@@ -237,6 +241,33 @@
 ssh · web ────────────────────▶ Audi ───┘  routes each request to the
                                            host running that guest</pre>
 <figcaption>One control plane, many hosts. Add a host and Marshall starts placing machines on it. <a href="architecture.html">Full architecture →</a></figcaption>
+</figure>
+</section>
+
+<section aria-labelledby="regions">
+<h2 id="regions">Close to your developers</h2>
+<p>Run the control plane in one region and put Lilly hosts wherever your developers are. Marshall and PostgreSQL stay together, with several Marshall instances for high availability. Lilly hosts can go anywhere, for example Washington DC, London and Singapore, and each one dials out to the control plane over HTTPS. SSH and web traffic for a machine go through Audi on that machine's own host, so the people using it get local latency.</p>
+<figure class="diagram">
+<pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">          ┌─ control plane · one region ───────────────────────────────┐
+          │                                                            │
+          │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL  │
+          │  several Marshall instances for high availability          │
+          │                                                            │
+          └──────────────────────────────┬─────────────────────────────┘
+                                         ▲
+                                         │  HTTPS, dialled out by every host
+                                         │
+            ┌────────────────────────────┼────────────────────────────┐
+ ┌──────────┴──────────┐      ┌──────────┴──────────┐      ┌──────────┴──────────┐
+ │ WASHINGTON DC       │      │ LONDON              │      │ SINGAPORE           │
+ │ Lilly  Lilly  Lilly │      │ Lilly  Lilly        │      │ Lilly  Lilly        │
+ │ guests on ZFS       │      │ guests on ZFS       │      │ guests on ZFS       │
+ │ Audi: SSH, web apps │      │ Audi: SSH, web apps │      │ Audi: SSH, web apps │
+ └─────────────────────┘      └─────────────────────┘      └─────────────────────┘
+            ▲                            ▲                            ▲
+      developers in                developers in                developers in
+      the Americas                    Europe                    Asia-Pacific</pre>
+<figcaption>Centralise the control plane; distribute the hosts.</figcaption>
 </figure>
 </section>
 
