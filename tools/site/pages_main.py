@@ -255,7 +255,7 @@ def landing():
 
 <section aria-labelledby="run">
 <h2 id="run">Run it yourself</h2>
-<p>Overalls is a set of NixOS modules plus tools for installing and enrolling bare-metal hosts. Your fleet is defined in a Git repository: you fork Overalls, declare your hosts, and each host keeps itself up to date from your <code>main</code> branch. You can start with one server and add hosts later.</p>
+<p>Overalls is a set of NixOS modules plus tools for installing and enrolling bare-metal hosts. Your fleet is defined in a Git repository: you fork Overalls, declare your hosts, and each host keeps itself up to date from your <code>main</code> branch. You can start with one server and add hosts later. To make the installation your own (patch a component, pin a package, add tools to the guest images), use <a href="https://ghuntley.com/nix/?{UTM}">Nix overlays <span aria-hidden="true">↗</span></a> in your fork.</p>
 <ol class="steps">
 <li data-state="current"><span class="step-marker" aria-hidden="true"></span><a href="self-host/index.html">Read the requirements and fork the repo</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/provision.html">Install NixOS on a bare-metal host</a></li>
