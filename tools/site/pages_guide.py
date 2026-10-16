@@ -27,7 +27,6 @@ def code(text):
     return "<pre data-copy>" + html.escape(text, quote=False).strip("\n") + "</pre>\n"
 
 
-STATUS_SELFHOST = '<span class="status-label" data-tone="preview">PREVIEW</span>'
 
 
 def overview():
@@ -36,7 +35,6 @@ def overview():
 {facts(
     ("Audience", "Operators who are comfortable with NixOS, SSH and PostgreSQL"),
     ("Time", "An afternoon for one host, if your DNS and email relay are ready"),
-    ("Status", f"{STATUS_SELFHOST} One-host and multi-host deployments work. Acceptance testing across hosts and under load is still open."),
 )}
 <h2>What you're building</h2>
 <ul>
@@ -87,7 +85,6 @@ def provision():
 {facts(
     ("Commands", "<code>discover</code> · <code>plan</code> · <code>install</code> · <code>enroll</code> · <code>verify</code>"),
     ("Inventory", "<code>fleet/hosts/NAME/host.json</code>, plus an optional <code>configuration.nix</code> for roles"),
-    ("Status", f"{STATUS_SELFHOST} Physical acceptance on Hetzner and EC2 is still being recorded."),
 )}
 <h2>1. Discover</h2>
 <p>Get the rescue system's Ed25519 host key through a trusted channel and put it in its own known-hosts file. Then record what the machine has:</p>
@@ -143,7 +140,6 @@ def deploy():
 {facts(
     ("Modules", "<code>nixosModules.default</code>, or <code>marshall</code>, <code>lilly</code>, <code>proxy</code>, <code>acme</code>, <code>secrets</code> and <code>backups</code> individually"),
     ("Target", "<code>x86_64-linux</code>, NixOS 26.05"),
-    ("Status", f"{STATUS_SELFHOST} A three-Marshall, two-Lilly fleet passes in local VMs."),
 )}
 <h2>1. Build and check</h2>
 {sh('''nix build .#marshall .#lilly
@@ -232,7 +228,6 @@ def enroll():
 {facts(
     ("Needs", "An installed host with its receipt, and administrative SSH to both the host and a Marshall host"),
     ("Credential", "Five years by default, revocable at any time, rotated explicitly"),
-    ("Status", f"{STATUS_SELFHOST}"),
 )}
 <h2>1. Declare the Lilly role</h2>
 <p>Add this to the host's <code>host.json</code> <em>before</em> installing, so the base system includes the identity helper:</p>
