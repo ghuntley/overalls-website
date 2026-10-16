@@ -276,7 +276,7 @@ def landing():
 
 <section aria-labelledby="who">
 <h2 id="who">Who is behind Overalls</h2>
-<p>Overalls is built by <a href="https://ghuntley.com/?{UTM}">Geoffrey Huntley <span aria-hidden="true">↗</span></a>, a software engineer who writes about AI-assisted software development. He created the <a href="https://ghuntley.com/ralph/?{UTM}">Ralph loop <span aria-hidden="true">↗</span></a>, which runs a coding agent in a loop until the work is done and is the technique <a href="https://ghuntley.com/loop/?{UTM}">loop engineering <span aria-hidden="true">↗</span></a> grew out of. He also writes about <a href="https://ghuntley.com/pressure/?{UTM}">back pressure <span aria-hidden="true">↗</span></a>: letting compilers, tests and type checkers push back on an agent's output so it corrects itself.</p>
+<p>Overalls is built by <a href="https://ghuntley.com/?{UTM}">Geoffrey Huntley <span aria-hidden="true">↗</span></a>, a software engineer who writes about AI-assisted software development. He created the <a href="https://ghuntley.com/ralph/?{UTM}">Ralph loop <span aria-hidden="true">↗</span></a>, which runs a coding agent in a loop until the work is done and is the technique <a href="https://ghuntley.com/loop/?{UTM}">loop engineering <span aria-hidden="true">↗</span></a> grew out of. He also defined <a href="https://ghuntley.com/pressure/?{UTM}">agent back pressure <span aria-hidden="true">↗</span></a>: letting compilers, tests and type checkers push back on an agent's output so it corrects itself.</p>
 </section>
 
 <section aria-labelledby="newsletter">
