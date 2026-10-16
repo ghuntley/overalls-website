@@ -74,83 +74,120 @@
 <section aria-labelledby="what">
 <h2 id="what">What you get</h2>
 <p class="legend"><span class="status-label" data-tone="stable">STABLE</span> built and covered by acceptance tests · <span class="status-label" data-tone="preview">PREVIEW</span> works, with rough edges · <span class="status-label" data-tone="experimental">EXPERIMENTAL</span> still being built</p>
+<div class="feature-group">
+<h3>Machines</h3>
 <div class="cols feature-grid">
 <article class="panel">
-<header><h3>Persistent microVMs</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Persistent microVMs</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Each machine is a Firecracker guest with its own kernel and a ZFS disk. Stopping it keeps the disk. Disks go up to 500 GiB.</p>
 </article>
 <article class="panel">
-<header><h3>NixOS</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>The default guest. Declarative and reproducible, with Nix and devenv ready for per-project environments. You can build your own variant with extra NixOS modules.</p>
-</article>
-<article class="panel">
-<header><h3>Ubuntu 26.04 LTS</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Built with Nix from pinned package snapshots, so every build of the image is identical. Add your own packages with a lockfile.</p>
-</article>
-<article class="panel">
-<header><h3>Windows Server 2025</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
-</article>
-<article class="panel">
-<header><h3>Tools already installed</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
-</article>
-<article class="panel">
-<header><h3>Browser terminal</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Run many persistent terminals per machine from a browser tab. People you share with start in watch mode and can take control and hand it back.</p>
-</article>
-<article class="panel">
-<header><h3>SSH management</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p><code>ssh &lt;gateway&gt; new</code>, <code>ls</code>, <code>start</code>, <code>stop</code> and <code>rm</code>, with <code>--json</code> and retry-safe request IDs for scripts. One wildcard SSH profile connects you to every guest.</p>
-</article>
-<article class="panel">
-<header><h3>Sharing and teams</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Share a machine as viewer, operator or manager. Revoking access applies even to pages that are already open. Teams share a pool of machines and integrations.</p>
-</article>
-<article class="panel">
-<header><h3>Clone, resize, relocate</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Clone, resize, relocate</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Clone a machine into an independent copy. Resize CPU and memory up or down, and grow the disk. Move a stopped machine to another host; it keeps its name, identity and address.</p>
 </article>
 <article class="panel">
-<header><h3>Locked-down profile</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Tools already installed</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv installed. Your Linux login, such as <code>u200001</code>, is the same on every machine.</p>
+</article>
+<article class="panel">
+<header><h4>Locked-down profile</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>For customer material: no outbound network, no sharing, no web exposure, and SSH for the owner only.</p>
 </article>
+</div>
+</div>
+<div class="feature-group">
+<h3>Operating systems</h3>
+<div class="cols feature-grid">
 <article class="panel">
-<header><h3>Repo launch links</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p><code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a machine with that repo checked out in <code>/workspace/REPO</code>. If you aren't signed in, the launch picks up again after you sign in.</p>
+<header><h4>NixOS</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>The default guest. Declarative and reproducible, with Nix and devenv ready for per-project environments. You can build your own variant with extra NixOS modules.</p>
 </article>
 <article class="panel">
-<header><h3>Browser extension</h3><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>One toolbar click on a GitHub, GitLab, Codeberg or Bitbucket Cloud repository opens it in a new machine on your deployment. It sends only the repository's origin and path, never page contents. Your deployment serves the Chrome and Firefox packages.</p>
+<header><h4>Ubuntu 26.04 LTS</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Built with Nix from pinned package snapshots, so every build of the image is identical. Add your own packages with a lockfile.</p>
 </article>
 <article class="panel">
-<header><h3>Public web apps</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Windows Server 2025</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal.</p>
+</article>
+</div>
+</div>
+<div class="feature-group">
+<h3>Working on a machine</h3>
+<div class="cols feature-grid">
+<article class="panel">
+<header><h4>Browser terminal</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Run many persistent terminals per machine from a browser tab. People you share with start in watch mode and can take control and hand it back.</p>
+</article>
+<article class="panel">
+<header><h4>SSH management</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p><code>ssh &lt;gateway&gt; new</code>, <code>ls</code>, <code>start</code>, <code>stop</code> and <code>rm</code>, with <code>--json</code> and retry-safe request IDs for scripts. One wildcard SSH profile connects you to every guest.</p>
+</article>
+<article class="panel">
+<header><h4>Public web apps</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Each machine can serve HTTPS on its own subdomain under <code>apps.&lt;your-domain&gt;</code>. Audi runs DNS and ingress for this.</p>
 </article>
 <article class="panel">
-<header><h3>Inference without keys</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Browser editor</h4><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<p>A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as you inside the guest. It is verified on NixOS; Ubuntu support is partial.</p>
+</article>
+</div>
+</div>
+<div class="feature-group">
+<h3>Collaboration</h3>
+<div class="cols feature-grid">
+<article class="panel">
+<header><h4>Share with coworkers</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Give a coworker access to one machine with an access-control role. <strong>Viewers</strong> watch the terminal, <strong>operators</strong> can also take control of it, and <strong>managers</strong> can also start, stop, delete and re-share the machine. The owner can't be removed. Cedar checks every action when it runs, so revoking access takes effect even on pages that are already open.</p>
+</article>
+<article class="panel">
+<header><h4>Teams</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>Owners, admins and members share a pool of machines, integrations and secrets, so a team's environments don't belong to whoever happened to create them.</p>
+</article>
+</div>
+</div>
+<div class="feature-group">
+<h3>Starting from a repository</h3>
+<div class="cols feature-grid">
+<article class="panel">
+<header><h4>Repo launch links</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p><code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a machine with that repo checked out in <code>/workspace/REPO</code>. If you aren't signed in, the launch picks up again after you sign in.</p>
+</article>
+<article class="panel">
+<header><h4>Browser extension</h4><span class="status-label" data-tone="stable">STABLE</span></header>
+<p>One toolbar click on a GitHub, GitLab, Codeberg or Bitbucket Cloud repository opens it in a new machine on your deployment. It sends only the repository's origin and path, never page contents. Your deployment serves the Chrome and Firefox packages.</p>
+</article>
+</div>
+</div>
+<div class="feature-group">
+<h3>AI</h3>
+<div class="cols feature-grid">
+<article class="panel">
+<header><h4>Inference without keys</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Guests call <code>https://llm.internal</code> for OpenAI and Anthropic models. Ziggy adds the provider credentials outside the guest and records usage per account, so no API key ever lives in a VM.</p>
 </article>
 <article class="panel">
-<header><h3>Integrations without keys</h3><span class="status-label" data-tone="stable">STABLE</span></header>
+<header><h4>Integrations without keys</h4><span class="status-label" data-tone="stable">STABLE</span></header>
 <p>Named integrations at <code>&lt;name&gt;.integration.internal</code> let guests call external APIs and peer VMs. Galileo adds the credentials at the edge, so a machine can use a secret without being able to read it.</p>
 </article>
 <article class="panel">
-<header><h3>Agent threads</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
+<header><h4>Agent threads</h4><span class="status-label" data-tone="preview">PREVIEW</span></header>
 <p>Each machine has threads of AI agent work. Sending a prompt wakes a stopped machine, and the agent's tools run inside the guest. You can also prompt from your terminal after approving it in the browser.</p>
 </article>
+</div>
+</div>
+<div class="feature-group">
+<h3>Running the platform</h3>
+<div class="cols feature-grid">
 <article class="panel">
-<header><h3>Browser editor</h3><span class="status-label" data-tone="preview">PREVIEW</span></header>
-<p>A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as you inside the guest. It is verified on NixOS; Ubuntu support is partial.</p>
-</article>
-<article class="panel">
-<header><h3>Inception</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
-<p>A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. Useful for working on Overalls with Overalls.</p>
-</article>
-<article class="panel">
-<header><h3>Multi-host fleet and HA</h3><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<header><h4>Multi-host fleet and HA</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
 <p>Several Marshall instances and many Lilly hosts are supported, and failure and recovery have been tested locally. Acceptance testing across hosts and under load is still open.</p>
 </article>
+<article class="panel">
+<header><h4>Inception</h4><span class="status-label" data-tone="experimental">EXPERIMENTAL</span></header>
+<p>A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. Useful for working on Overalls with Overalls.</p>
+</article>
+</div>
 </div>
 </section>
 
