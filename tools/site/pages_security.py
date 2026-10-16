@@ -3,8 +3,9 @@ from layout import SOURCE, page
 ADVISORY = SOURCE + "/security/advisories/new"
 BASE = "https://ghuntley.dev/"
 
-# RFC 9116 asks for an Expires date less than a year away. Renew it before then.
-EXPIRES = "2027-10-01T00:00:00Z"
+# Expires is a required field in RFC 9116, so it's set far in the future instead of omitted.
+# The RFC recommends less than a year ahead; some scanners will warn about this date.
+EXPIRES = "2099-12-31T23:59:59Z"
 
 # Researchers credited on the hall of fame, newest first:
 # (date "YYYY-MM-DD", name, profile URL or "", advisory URL or "", one-line finding)

@@ -1,5 +1,5 @@
 Contact: https://github.com/ghuntley/overalls/security/advisories/new
-Expires: 2027-10-01T00:00:00Z
+Expires: 2099-12-31T23:59:59Z
 Preferred-Languages: en
 Canonical: https://ghuntley.dev/.well-known/security.txt
 Policy: https://ghuntley.dev/security/
