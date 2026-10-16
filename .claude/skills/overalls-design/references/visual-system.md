@@ -56,6 +56,8 @@ Inverse video marks the current nav item, the primary button and EXPERIMENTAL la
 - **Wrapping:** use `text-wrap: balance` on headlines and taglines so no line ends with a lone word.
   Force a deliberate line break with `<span class="line">` (display: block) rather than `<br>`.
   For example, "An AI-first developer platform / that you own."
+- **Inline code:** weight 600 on a `--background-color-alt` shading. A 2px outline in the same colour
+  pads it without horizontal padding, so text stays on the grid.
 - **Links:** underlined with a 2px decoration and the same colour as text. External links end in ` ↗`.
 
 ## Borders and shapes

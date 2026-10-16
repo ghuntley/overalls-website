@@ -10,7 +10,7 @@
 ## Self-hosting guide
 
 - [Overview and requirements](https://overalls.dev/self-host/index.html)
-- [Provision a host](https://overalls.dev/self-host/provision.html): nix run .#host -- discover | plan | install | enroll | verify
+- [Provision a host](https://overalls.dev/self-host/provision.html): `nix run .#host -- discover | plan | install | enroll | verify`
 - [Deploy the control plane](https://overalls.dev/self-host/deploy.html): NixOS modules, secrets, PostgreSQL, SMTP, TLS
 - [Enroll hosts and images](https://overalls.dev/self-host/enroll.html): Lilly credentials, guest images, Porsche gateway
 - [Your first machine](https://overalls.dev/self-host/first-machine.html): sign in, SSH keys, CLI, repository launch

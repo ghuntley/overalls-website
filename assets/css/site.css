@@ -1285,3 +1285,10 @@ dl.kv.sponsors dt {
 .announcement time {
   font-weight: var(--font-weight-bold);
 }
+
+/* Inline code: shaded like command blocks so it stands out from monospace body text.
+   No horizontal padding, so text stays on the character grid. */
+:not(pre) > code {
+  background: var(--background-color-alt);
+  outline: 2px solid var(--background-color-alt);
+}
