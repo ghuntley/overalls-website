@@ -70,7 +70,7 @@ FEATURES = [
     ("Public web apps", "stable",
      "Each machine can serve HTTPS on its own subdomain under <code>apps.&lt;your-domain&gt;</code>. "
      "Audi runs DNS and ingress for this."),
-    ("Agent threads", "preview",
+    ("Agent threads", "stable",
      "Each machine has threads of AI agent work. Sending a prompt wakes a stopped machine, and the "
      "agent's tools run inside the guest. You can also prompt from your terminal after approving it in the browser."),
     ("Browser editor", "preview",
