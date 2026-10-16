@@ -183,6 +183,28 @@ Use a `.docs-shell` grid:
 
 `guide_page()` in `tools/site/layout.py` builds all of this.
 
+## Newsletter signup (Ghost)
+
+```html
+<form class="newsletter-form" action="https://ghuntley.com/newsletter/" method="get" data-ghost-site="https://ghuntley.com">
+<label for="newsletter-email" class="sr-only">Email address</label>
+<input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+<button type="submit" class="console-button primary">Subscribe</button>
+</form>
+<p class="newsletter-status muted" role="status" aria-live="polite">Unsubscribe any time. Sent from <a href="https://ghuntley.com/newsletter/">ghuntley.com ↗</a>.</p>
+```
+
+- `site.js` makes the same two calls as Ghost's own embeddable signup form, without its iframe or
+  third-party script:
+  1. `GET /members/api/integrity-token/`
+  2. `POST /members/api/send-magic-link/` with `{email, emailType: "signup", integrityToken}`
+- ghuntley.com allows these calls from other origins.
+- Status text is always set with `textContent`, never `innerHTML`.
+- Without JS, the form opens ghuntley.com/newsletter/.
+- Don't test with real addresses, which would sign someone up. Use an address Ghost rejects, like
+  `a@b`, and do it sparingly: Ghost rate-limits sign-ups per IP, returns `429` with no CORS header,
+  and the browser shows that as "Failed to fetch".
+
 ## Footer
 
 ```html

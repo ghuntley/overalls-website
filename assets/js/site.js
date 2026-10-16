@@ -44,8 +44,64 @@
     return clone.textContent.replace(/^\n+|\s+$/g, "") + "\n";
   };
 
+  // Newsletter: subscribe through the Ghost members API on ghuntley.com, the same
+  // calls Ghost's own embeddable signup form makes. Without JS the form falls
+  // back to opening ghuntley.com/newsletter/.
+  const newsletter = form => {
+    const site = form.dataset.ghostSite;
+    const status = form.parentElement.querySelector(".newsletter-status");
+    const input = form.querySelector("input[type=email]");
+    const button = form.querySelector("button");
+    // Server messages are untrusted, so status text is set as text, never as HTML.
+    const say = (state, text, link) => {
+      status.dataset.state = state;
+      status.textContent = text;
+      if (link) {
+        const a = document.createElement("a");
+        a.href = `${site}/newsletter/`;
+        a.textContent = "ghuntley.com/newsletter ↗";
+        status.append(a, ".");
+      }
+    };
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (form.dataset.state === "sending") return;
+      form.dataset.state = "sending";
+      button.disabled = true;
+      say("sending", "Sending…");
+      try {
+        const token = await fetch(`${site}/members/api/integrity-token/`).then(r => {
+          if (!r.ok) throw new Error(r.statusText);
+          return r.text();
+        });
+        const response = await fetch(`${site}/members/api/send-magic-link/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: input.value.trim(), emailType: "signup", integrityToken: token }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          const failure = new Error(body.errors?.[0]?.message || response.statusText);
+          failure.fromServer = true;
+          throw failure;
+        }
+        form.reset();
+        say("done", "Check your inbox and click the link to confirm your subscription.");
+      } catch (error) {
+        // Rate limits and outages arrive without CORS headers and surface as a bare
+        // network error, so only Ghost's own validation messages are shown verbatim.
+        const reason = error?.fromServer && error.message ? `${error.message.replace(/\.$/, "")}. ` : "ghuntley.com didn't answer. ";
+        say("error", `Couldn't subscribe. ${reason}Try again, or sign up at `, true);
+      } finally {
+        form.dataset.state = "";
+        button.disabled = false;
+      }
+    });
+  };
+
   const enhance = () => {
     apply();
+    document.querySelectorAll("form[data-ghost-site]").forEach(newsletter);
     if (!navigator.clipboard) return;
     document.querySelectorAll("pre[data-copy]").forEach(pre => {
       pre.classList.add("copyable");

@@ -1222,3 +1222,45 @@ section > h2::before {
     display: none;
   }
 }
+
+/* Donors and sponsors: names in full text colour, not the muted dt default. */
+dl.kv.sponsors > div {
+  grid-template-columns: minmax(20ch, max-content) minmax(0, 1fr);
+}
+dl.kv.sponsors dt {
+  color: var(--text-color);
+}
+@media (max-width: 480px) {
+  dl.kv.sponsors > div {
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: calc(var(--line-height) / 2);
+  }
+}
+
+/* Newsletter signup: email field and button on one row, stacked on phones. */
+.newsletter-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: var(--line-height) 1ch;
+  max-width: calc(min(60ch, round(down, 100%, 1ch)));
+  margin-bottom: var(--line-height);
+}
+.newsletter-form input {
+  width: 100%;
+}
+.newsletter-form[data-state="sending"] button {
+  color: var(--text-color-alt);
+  cursor: progress;
+}
+.newsletter-status[data-state="done"] {
+  color: var(--text-color);
+  font-weight: var(--font-weight-medium);
+}
+.newsletter-status[data-state="error"]::before {
+  content: "! ";
+}
+@media (max-width: 480px) {
+  .newsletter-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
