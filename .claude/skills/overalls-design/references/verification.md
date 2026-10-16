@@ -62,7 +62,7 @@ What to look for:
 
 ```sh
 git add -A && git commit -m "…" && git push
-for i in $(seq 1 15); do sleep 10; curl -s https://ghuntley.dev/ | grep -q "NEW TEXT" && { echo live; break; }; done
+for i in $(seq 1 15); do sleep 10; curl -s https://overalls.dev/ | grep -q "NEW TEXT" && { echo live; break; }; done
 ```
 
 GitHub Pages serves `main` at the repo root, with the custom domain in `CNAME` and HTTPS enforced.

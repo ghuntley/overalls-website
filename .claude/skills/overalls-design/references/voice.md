@@ -75,7 +75,7 @@ pun in every line.
   - Ziggy: inference
   - Lyra: CLI
 - Use placeholders for anything deployment-specific: `<your-domain>`, `<gateway>`, `OWNER/REPO`,
-  `<machine-uuid>`. Never write `overalls.dev` as a service someone can use.
+  `<machine-uuid>`. `overalls.dev` is this project website, never a service someone can sign up for or use.
 
 ## Card copy formula
 

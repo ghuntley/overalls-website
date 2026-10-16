@@ -1,7 +1,7 @@
 from layout import SOURCE, page
 
 ADVISORY = SOURCE + "/security/advisories/new"
-BASE = "https://ghuntley.dev/"
+BASE = "https://overalls.dev/"
 
 # Expires is a required field in RFC 9116, so it's set far in the future instead of omitted.
 # The RFC recommends less than a year ahead; some scanners will warn about this date.
@@ -40,7 +40,7 @@ def policy():
 <ul>
 <li>The Overalls source code at <a href="{SOURCE}">{SOURCE.removeprefix("https://")} <span aria-hidden="true">↗</span></a>: Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, the <code>overalls</code> CLI, the browser extension, the NixOS modules, the host tools and the guest images.</li>
 <li>Anything that lets one tenant reach another: escaping a guest, crossing the guest network isolation, reading another account's machines, terminals or usage, or reading secrets that are supposed to stay at the edge.</li>
-<li>This website, <code>ghuntley.dev</code>.</li>
+<li>This website, <code>overalls.dev</code>.</li>
 </ul>
 </div>
 </section>

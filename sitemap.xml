@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ghuntley.dev/</loc>
+    <loc>https://overalls.dev/</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/architecture.html</loc>
+    <loc>https://overalls.dev/architecture.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/</loc>
+    <loc>https://overalls.dev/self-host/</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/provision.html</loc>
+    <loc>https://overalls.dev/self-host/provision.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/deploy.html</loc>
+    <loc>https://overalls.dev/self-host/deploy.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/enroll.html</loc>
+    <loc>https://overalls.dev/self-host/enroll.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/first-machine.html</loc>
+    <loc>https://overalls.dev/self-host/first-machine.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/self-host/operations.html</loc>
+    <loc>https://overalls.dev/self-host/operations.html</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/security/</loc>
+    <loc>https://overalls.dev/security/</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://ghuntley.dev/security/hall-of-fame/</loc>
+    <loc>https://overalls.dev/security/hall-of-fame/</loc>
     <lastmod>2026-10-16</lastmod>
     <priority>0.4</priority>
   </url>

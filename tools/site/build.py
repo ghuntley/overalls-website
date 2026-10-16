@@ -2,7 +2,7 @@ import datetime, pathlib, re, sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import pages_main as m, pages_guide as g, pages_security as sec
 
-BASE = "https://ghuntley.dev/"
+BASE = "https://overalls.dev/"
 
 out = pathlib.Path(sys.argv[1])
 files = {

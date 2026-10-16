@@ -1,4 +1,4 @@
-# ghuntley.dev
+# overalls.dev
 
 The public website for [Overalls](https://github.com/ghuntley/overalls), the
 self-hosted Firecracker dev-machine platform. It's flat static HTML served by GitHub

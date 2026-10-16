@@ -1,6 +1,6 @@
 Contact: https://github.com/ghuntley/overalls/security/advisories/new
 Expires: 2099-12-31T23:59:59Z
 Preferred-Languages: en
-Canonical: https://ghuntley.dev/.well-known/security.txt
-Policy: https://ghuntley.dev/security/
-Acknowledgments: https://ghuntley.dev/security/hall-of-fame/
+Canonical: https://overalls.dev/.well-known/security.txt
+Policy: https://overalls.dev/security/
+Acknowledgments: https://overalls.dev/security/hall-of-fame/

@@ -4,17 +4,17 @@
 
 ## Site
 
-- [Home](https://ghuntley.dev/index.html): what Overalls is, features with status labels (STABLE, PREVIEW, EXPERIMENTAL), FAQ
-- [Architecture](https://ghuntley.dev/architecture.html): components (Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, Lyra), control plane, machine lifecycle, guest edge services
+- [Home](https://overalls.dev/index.html): what Overalls is, features with status labels (STABLE, PREVIEW, EXPERIMENTAL), FAQ
+- [Architecture](https://overalls.dev/architecture.html): components (Marshall, Lilly, Porsche, Audi, Brady, Enrico, Galileo, Ziggy, Lyra), control plane, machine lifecycle, guest edge services
 
 ## Self-hosting guide
 
-- [Overview and requirements](https://ghuntley.dev/self-host/index.html)
-- [Provision a host](https://ghuntley.dev/self-host/provision.html): nix run .#host -- discover | plan | install | enroll | verify
-- [Deploy the control plane](https://ghuntley.dev/self-host/deploy.html): NixOS modules, secrets, PostgreSQL, SMTP, TLS
-- [Enroll hosts and images](https://ghuntley.dev/self-host/enroll.html): Lilly credentials, guest images, Porsche gateway
-- [Your first machine](https://ghuntley.dev/self-host/first-machine.html): sign in, SSH keys, CLI, repository launch
-- [Day-two operations](https://ghuntley.dev/self-host/operations.html): updates, drains, relocation, backups, logs
+- [Overview and requirements](https://overalls.dev/self-host/index.html)
+- [Provision a host](https://overalls.dev/self-host/provision.html): nix run .#host -- discover | plan | install | enroll | verify
+- [Deploy the control plane](https://overalls.dev/self-host/deploy.html): NixOS modules, secrets, PostgreSQL, SMTP, TLS
+- [Enroll hosts and images](https://overalls.dev/self-host/enroll.html): Lilly credentials, guest images, Porsche gateway
+- [Your first machine](https://overalls.dev/self-host/first-machine.html): sign in, SSH keys, CLI, repository launch
+- [Day-two operations](https://overalls.dev/self-host/operations.html): updates, drains, relocation, backups, logs
 
 ## Repository documentation
 
@@ -23,6 +23,6 @@
 
 ## Security
 
-- [Vulnerability disclosure policy](https://ghuntley.dev/security/): scope, how to report (GitHub private security advisory), safe harbour
-- [Hall of fame](https://ghuntley.dev/security/hall-of-fame/): researchers credited for responsible disclosure
-- [security.txt](https://ghuntley.dev/.well-known/security.txt)
+- [Vulnerability disclosure policy](https://overalls.dev/security/): scope, how to report (GitHub private security advisory), safe harbour
+- [Hall of fame](https://overalls.dev/security/hall-of-fame/): researchers credited for responsible disclosure
+- [security.txt](https://overalls.dev/.well-known/security.txt)
