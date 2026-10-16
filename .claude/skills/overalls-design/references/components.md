@@ -212,12 +212,31 @@ Use a `.docs-shell` grid:
   third-party script:
   1. `GET /members/api/integrity-token/`
   2. `POST /members/api/send-magic-link/` with `{email, emailType: "signup", integrityToken}`
-- ghuntley.com allows these calls from other origins.
+- Ghost answers every origin with `access-control-allow-origin: *`, on its 4xx errors too, so a
+  refusal from Ghost itself (`Email is not valid`, Ghost's own 429s) is shown verbatim.
+- ghuntley.com is on Ghost(Pro). Fastly's WAF sits in front of `/members/api/` and refuses some
+  networks (VPNs, shared and datacenter addresses, addresses that signed up repeatedly) with a
+  `429 Too many sign-up attempts` that has no CORS headers and also covers preflights. The browser
+  reports that only as `Failed to fetch`. The status line then explains the likely cause and links
+  to `ghuntley.com/#/portal/signup`, where Portal runs on Ghost's own origin and can show the real
+  reason. Nothing on this site can get past that block.
 - Status text is always set with `textContent`, never `innerHTML`.
 - Without JS, the form opens ghuntley.com/newsletter/.
-- Don't test with real addresses, which would sign someone up. Use an address Ghost rejects, like
-  `a@b`, and do it sparingly: Ghost rate-limits sign-ups per IP, returns `429` with no CORS header,
-  and the browser shows that as "Failed to fetch".
+- Testing: a blocked network cannot test this at all, and a browser gives no detail, so test with
+  curl from a network you haven't signed up from (a GitHub Actions runner works):
+
+  ```sh
+  O="Origin: https://overalls.dev"
+  curl -sS -D - -o tok.txt -H "$O" https://ghuntley.com/members/api/integrity-token/
+  curl -sS -D - -H "$O" -H "Content-Type: application/json" \
+    -d "{\"email\":\"a@b\",\"emailType\":\"signup\",\"integrityToken\":\"$(cat tok.txt)\"}" \
+    https://ghuntley.com/members/api/send-magic-link/
+  ```
+
+  Healthy: `200` with the token, then `400 {"errors":[{"message":"Email is not valid"}]}`, both
+  with `access-control-allow-origin: *`. A real address returns `201` and sends the magic link, so
+  use one only when you mean to sign it up. Blocked: `429` from `server: Varnish` with no CORS
+  header on every request, including the token and `OPTIONS`.
 
 ## Footer
 

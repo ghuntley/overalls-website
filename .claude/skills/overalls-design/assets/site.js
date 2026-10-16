@@ -45,8 +45,16 @@
   };
 
   // Newsletter: subscribe through the Ghost members API on ghuntley.com, the same
-  // calls Ghost's own embeddable signup form makes. Without JS the form falls
+  // two calls Ghost's own embeddable signup form makes. Without JS the form falls
   // back to opening ghuntley.com/newsletter/.
+  //
+  // ghuntley.com is on Ghost(Pro), whose Fastly edge sits in front of the members
+  // API. Ghost itself answers every origin with CORS headers, including its 4xx
+  // errors, but the edge refuses some networks (VPNs, shared and datacenter
+  // addresses, addresses that signed up repeatedly) with a 429 that has none, and
+  // the browser reports that only as "Failed to fetch". The same requests succeed
+  // from other networks, so that case is explained and the visitor is pointed at
+  // Portal on ghuntley.com, which can show them the real reason.
   const newsletter = form => {
     const site = form.dataset.ghostSite;
     const status = form.parentElement.querySelector(".newsletter-status");
@@ -58,8 +66,8 @@
       status.textContent = text;
       if (link) {
         const a = document.createElement("a");
-        a.href = `${site}/newsletter/`;
-        a.textContent = "ghuntley.com/newsletter ↗";
+        a.href = `${site}/#/portal/signup`;
+        a.textContent = "ghuntley.com ↗";
         status.append(a, ".");
       }
     };
@@ -71,7 +79,7 @@
       say("sending", "Sending…");
       try {
         const token = await fetch(`${site}/members/api/integrity-token/`).then(r => {
-          if (!r.ok) throw new Error(r.statusText);
+          if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { fromServer: true });
           return r.text();
         });
         const response = await fetch(`${site}/members/api/send-magic-link/`, {
@@ -80,20 +88,21 @@
           body: JSON.stringify({ email: input.value.trim(), emailType: "signup", integrityToken: token }),
         });
         if (!response.ok) {
+          // HTTP/2 has no status text, so fall back to the status code.
           const body = await response.json().catch(() => ({}));
-          const failure = new Error(body.errors?.[0]?.message || response.statusText);
-          failure.fromServer = true;
-          throw failure;
+          throw Object.assign(new Error(body.errors?.[0]?.message || `HTTP ${response.status}`), { fromServer: true });
         }
         form.reset();
         say("done", "Check your inbox and click the link to confirm your subscription.");
       } catch (error) {
-        // Rate limits and outages arrive without CORS headers and surface as a bare
-        // network error, so only Ghost's own validation messages are shown verbatim.
-        const reason = error?.fromServer && error.message
-          ? `${error.message.replace(/\.$/, "")}. `
-          : "The newsletter service didn't respond, possibly because it's limiting sign-ups from your network. Wait a while and ";
-        say("error", `Couldn't subscribe. ${reason}${error?.fromServer ? "Try" : "try"} again, or sign up at `, true);
+        if (error?.fromServer) {
+          // Ghost answered, so its message is worth showing (e.g. "Email is not valid").
+          say("error", `Couldn't subscribe. ${error.message.replace(/\.$/, "")}. Try again, or sign up at `, true);
+        } else if (navigator.onLine === false) {
+          say("error", "You're offline. Reconnect and try again.");
+        } else {
+          say("error", "Couldn't reach ghuntley.com. Its spam protection refuses sign-ups from some networks, such as VPNs and shared addresses, without saying so. Try another network, or sign up at ", true);
+        }
       } finally {
         form.dataset.state = "";
         button.disabled = false;
