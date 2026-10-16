@@ -242,7 +242,7 @@ DNS_DIAGRAM = """\
 
 def dns():
     body = f"""<h1>Set up DNS</h1>
-<p>Overalls uses two kinds of DNS. Your domain's apex stays with your normal DNS provider and points at your Marshall hosts. A subzone, <code>apps.&lt;your-domain&gt;</code>, is delegated to Audi, which answers for every machine's hostname itself. That's what lets a machine move between hosts without you touching DNS.</p>
+<p>Overalls uses two kinds of DNS. Your domain's apex stays with your normal DNS provider and points at your Marshall hosts. A subzone, <code>apps.&lt;your-domain&gt;</code>, is delegated to Audi, which answers for every machine's hostname itself. That's what lets a machine move between hosts without you touching DNS. It also conserves scarce IPv4 addresses: you can create as many machines as you like, and they share the host's IPv4 address between them.</p>
 {facts(
     ("You create", "One apex A record per Marshall host, two to eight <code>ns</code> A records, and one NS delegation"),
     ("Audi serves", "<code>&lt;machine&gt;.apps.&lt;your-domain&gt;</code>, and the wildcard certificate challenge"),
