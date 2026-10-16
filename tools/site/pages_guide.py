@@ -253,8 +253,8 @@ def dns():
 <figcaption>The apex stays with your provider; Audi answers for everything under <code>apps</code>.</figcaption>
 </figure>
 
-<h2>1. Choose the Audi DNS hosts</h2>
-<p>Run Audi's authoritative DNS on at least two independent hosts, and at most eight. Each needs a stable public IPv4 address that's reachable on UDP and TCP port 53. In a small fleet these are usually the control-plane hosts. Every Lilly host also runs an Audi gateway, which carries SSH and web traffic to its own machines, but gateways don't need DNS records of their own.</p>
+<h2>1. Choose where Audi DNS runs</h2>
+<p>Audi doesn't need hosts of its own. Its DNS role can run on your Marshall control-plane hosts, and on Lilly hosts too. We recommend running it in several places: the module needs two to eight nameservers, and spreading them across hosts keeps DNS answering when one goes down. Each one needs a stable public IPv4 address that's reachable on UDP and TCP port 53. Every Lilly host also runs an Audi gateway, which carries SSH and web traffic to its own machines, but gateways don't need DNS records of their own.</p>
 
 <h2>2. Create the records at your DNS provider</h2>
 <table>
