@@ -71,7 +71,7 @@
 <main id="main-content">
 <div class="prose">
 <h1>Architecture</h1>
-<p>Overalls is a monorepo of small services, each named after something or someone, with one NixOS deployment that wires them together. Marshall holds the record of what should exist. Lilly hosts make it physically true and report back. The other services sit at the edges: SSH, DNS, egress, inference and integrations.</p>
+<p>Overalls is a monorepo of small services, each named after something or someone, with one NixOS deployment that wires them together. Marshall holds the record of what should exist. Lilly hosts make it physically true and report back. The other services sit at the edges: SSH, DNS, egress, inference, integrations, clients and notifications.</p>
 </div>
 
 <section aria-labelledby="components">
@@ -88,7 +88,10 @@
 <tr><td class="width-min" data-label="Name:"><strong>Galileo</strong><br><code class="muted">galileo/</code></td><td data-label="Role:">Integration gateway</td><td class="width-auto" data-label="Gives you:">Named integrations at <code>&lt;name&gt;.integration.internal</code>; credentials are added at the edge.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Ziggy</strong><br><code class="muted">ziggy/</code></td><td data-label="Role:">Inference proxy</td><td class="width-auto" data-label="Gives you:"><code>llm.internal</code> for guests, with no provider keys inside the VM and usage recorded per account.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Lyra</strong><br><code class="muted">lyra/</code></td><td data-label="Role:">CLI and guest tools (Rust)</td><td class="width-auto" data-label="Gives you:">The <code>overalls</code> CLI: wildcard SSH, <code>open</code> for repos, <code>agent</code> prompts. It also runs the agent's tools inside the guest.</td></tr>
-<tr><td class="width-min" data-label="Name:"><strong>Browser</strong><br><code class="muted">browser/</code></td><td data-label="Role:">Toolbar extension</td><td class="width-auto" data-label="Gives you:">Opens the repository page you're on in your Overalls deployment.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Marvin</strong><br><code class="muted">marvin/</code></td><td data-label="Role:">Browser extension</td><td class="width-auto" data-label="Gives you:">Opens the repository page you're on in your Overalls deployment.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Mila</strong><br><code class="muted">mila/</code></td><td data-label="Role:">Desktop and mobile client (Flutter)</td><td class="width-auto" data-label="Gives you:">Manages machines over one SSH connection to Porsche, signs in by approving a device key in the browser, and opens <code>overalls://</code> links on iOS, Android, macOS and Windows.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Susan</strong><br><code class="muted">susan/</code></td><td data-label="Role:">Push notification relay</td><td class="width-auto" data-label="Gives you:">Relays end-to-end encrypted Mila notifications to APNs, FCM and WNS without seeing their content.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Peach</strong><br><code class="muted">peach/</code></td><td data-label="Role:">Guest reflection service</td><td class="width-auto" data-label="Gives you:">Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Packaged, but not enabled by default yet.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Protocol</strong><br><code class="muted">protocol/</code></td><td data-label="Role:">Shared wire schemas</td><td class="width-auto" data-label="Gives you:">Validates the messages services exchange, so their interfaces stay consistent.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Fleet and Nix</strong><br><code class="muted">fleet/ nix/</code></td><td data-label="Role:">Declarative infrastructure</td><td class="width-auto" data-label="Gives you:">NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools.</td></tr>
 </tbody>

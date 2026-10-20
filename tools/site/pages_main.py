@@ -396,8 +396,14 @@ COMPONENTS = [
      "<code>llm.internal</code> for guests, with no provider keys inside the VM and usage recorded per account."),
     ("Lyra", "lyra/", "CLI and guest tools (Rust)",
      "The <code>overalls</code> CLI: wildcard SSH, <code>open</code> for repos, <code>agent</code> prompts. It also runs the agent's tools inside the guest."),
-    ("Browser", "browser/", "Toolbar extension",
+    ("Marvin", "marvin/", "Browser extension",
      "Opens the repository page you're on in your Overalls deployment."),
+    ("Mila", "mila/", "Desktop and mobile client (Flutter)",
+     "Manages machines over one SSH connection to Porsche, signs in by approving a device key in the browser, and opens <code>overalls://</code> links on iOS, Android, macOS and Windows."),
+    ("Susan", "susan/", "Push notification relay",
+     "Relays end-to-end encrypted Mila notifications to APNs, FCM and WNS without seeing their content."),
+    ("Peach", "peach/", "Guest reflection service",
+     "Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Packaged, but not enabled by default yet."),
     ("Protocol", "protocol/", "Shared wire schemas",
      "Validates the messages services exchange, so their interfaces stay consistent."),
     ("Fleet and Nix", "fleet/ nix/", "Declarative infrastructure",
@@ -432,7 +438,7 @@ def architecture():
     body = f"""<main id="main-content">
 <div class="prose">
 <h1>Architecture</h1>
-<p>Overalls is a monorepo of small services, each named after something or someone, with one NixOS deployment that wires them together. Marshall holds the record of what should exist. Lilly hosts make it physically true and report back. The other services sit at the edges: SSH, DNS, egress, inference and integrations.</p>
+<p>Overalls is a monorepo of small services, each named after something or someone, with one NixOS deployment that wires them together. Marshall holds the record of what should exist. Lilly hosts make it physically true and report back. The other services sit at the edges: SSH, DNS, egress, inference, integrations, clients and notifications.</p>
 </div>
 
 <section aria-labelledby="components">
