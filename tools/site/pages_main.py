@@ -403,7 +403,7 @@ COMPONENTS = [
     ("Susan", "susan/", "Push notification relay",
      "Relays end-to-end encrypted Mila notifications to APNs, FCM and WNS without seeing their content."),
     ("Peach", "peach/", "Guest reflection service",
-     "Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Packaged, but not enabled by default yet."),
+     "Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Opt-in for each host, with a credential issued by Marshall; the private-services certificate must also cover <code>reflection.internal</code>."),
     ("Protocol", "protocol/", "Shared wire schemas",
      "Validates the messages services exchange, so their interfaces stay consistent."),
     ("Fleet and Nix", "fleet/ nix/", "Declarative infrastructure",
