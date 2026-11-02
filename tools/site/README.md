@@ -6,13 +6,16 @@ the committed HTML is what gets served, and this generator is just how it's writ
 ```sh
 python3 -I tools/site/build.py .     # regenerate every page, sitemap.xml and robots.txt
 python3 -I tools/site/check.py .     # check links, anchors, external resources and colour literals
+python3 -I tools/site/test_check.py  # run checker regression tests
 ```
 
 | File | Contents |
 |---|---|
 | `layout.py` | `<head>`, header, footer, the overalls `MARK`, and the guide page shell with its sidebar and pager |
 | `pages_main.py` | Landing page (`FEATURES`, `CATEGORIES`, diagrams), architecture page and 404 |
-| `pages_guide.py` | The six self-hosting guide pages |
+| `pages_guide.py` | The seven self-hosting guide pages |
+| `pages_security.py` | Security policy, hall of fame and security.txt |
+| `check.py`, `test_check.py` | Site validation and checker regression tests |
 | `diagram_*.py` | Box-drawing diagrams drawn on the skill's character canvas. Run one and paste its output into `pages_main.py`. |
 
 Style, voice and component rules are in `.claude/skills/overalls-design/`.

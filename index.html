@@ -83,7 +83,7 @@
 <div class="hero">
 <div>
 <h1>An AI-first developer platform <span class="line">that you own.</span></h1>
-<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM. Choose NixOS, Ubuntu, Arch Linux, AlmaLinux, FreeBSD, OmniOS or Windows, and keep its disk, name and address when you stop, start, resize, clone or move it.</p>
+<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM. Choose NixOS, Ubuntu, Arch Linux, AlmaLinux, FreeBSD, OmniOS or Windows, and keep its disk, name and address when you stop, start, resize or move it. Cloning makes an independent copy with a new name, identity and address.</p>
 <p class="lede">Overalls has its own agent built in: start a thread on any machine from the browser or the CLI, and it keeps working after you close your laptop, waking the machine if it was stopped. It's the Amp orbs workflow on hardware you own.</p>
 <p class="lede">NixOS and Ubuntu include Claude Code and Codex, configured for your deployment's inference providers, with provider keys kept outside the machine. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Mila's native desktop and mobile clients are in preview. Put hosts in every region your team works in.</p>
 <p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
@@ -127,7 +127,7 @@
 </article>
 <article class="panel">
 <header><h4>Clone, resize, relocate</h4><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>Clone a machine into an independent copy. Resize CPU and memory up or down, and grow the disk. Move a stopped machine to another host; it keeps its name, identity and address.</p>
+<p>Clone a machine into an independent copy. Resize CPU and memory up or down, and grow the disk. Move a machine to another host; it keeps its name, identity and address. Running moves involve downtime.</p>
 </article>
 <article class="panel">
 <header><h4>Tools already installed</h4><span class="status-label" data-tone="stable">STABLE</span></header>
@@ -139,7 +139,7 @@
 </article>
 <article class="panel">
 <header><h4>Locked-down profile</h4><span class="status-label" data-tone="stable">STABLE</span></header>
-<p>For customer material: no outbound network, no sharing, no web exposure, and SSH for the owner only.</p>
+<p>For customer material: outbound networking, sharing and web apps are blocked. The owner can use SSH, the browser terminal and a personal browser editor.</p>
 </article>
 </div>
 </div>

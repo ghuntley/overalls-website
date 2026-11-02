@@ -104,13 +104,14 @@
 <h2>1. Declare the Lilly role</h2>
 <p>Add this to the host's <code>host.json</code> <em>before</em> installing, so the base system includes the identity helper:</p>
 <pre data-copy>"lilly": {
-  "controlPlane": "https://marshall.example.com",
+  "controlPlane": "https://control.internal.example:5443",
   "egressInterface": "eth0",
   "credentialTtlSeconds": 157680000,
   "overheads": {"cores": 1, "memoryBytes": 1073741824, "storageBytes": 1073741824}
 }</pre>
 
 <p>Host names for Lilly hosts can be at most 26 characters. Don't set Lilly host or pool IDs by hand; they're generated.</p>
+<p>The control-plane URL reaches Marshall's private fleet listener. If it uses your own CA, set <code>services.lilly.controlPlaneCAFile</code> in the host's <code>configuration.nix</code> to the installed CA bundle, such as <code>/etc/overalls/service-ca.crt</code>.</p>
 
 <h2>2. Prepare the enrollment</h2>
 <p>Deploy the Marshall release and its migration first. Then, from your checkout:</p>
@@ -159,8 +160,10 @@ Encrypt the token into that host's <code>porsche</code> secret bundle as <code>P
 <pre data-copy>services.openssh.ports = [ 2222 ];
 services.porsche = {
   enable = true;
-  controlPlane = "https://example.com";
+  bindAddress = "192.0.2.10";
+  controlPlane = "https://control.internal.example:5443";
   publicOrigin = "https://example.com";
+  caFile = "/etc/overalls/service-ca.crt";
   credentialFile = "${config.services.overallsSecrets.bundles.porsche.directory}/token";
   secretUnits = [ config.services.overallsSecrets.bundles.porsche.unit ];
   openFirewall = true;
@@ -168,7 +171,9 @@ services.porsche = {
 
 </li>
 </ol>
-<p>Porsche presents an SSH host certificate signed by Marshall's SSH host CA, set with <code>services.marshall.sshHostCa</code>. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
+<p>Replace <code>192.0.2.10</code> with the host's primary public address. When Audi shares this host, bind its gateway to a different explicit service address: both gateways listen on port 22, and Audi also needs ports 80 and 443. The modules reject overlapping SSH listeners. Keep <code>publicOrigin</code> on the public browser domain; <code>controlPlane</code> uses the private fleet endpoint.</p>
+<p>Before starting either gateway, configure Marshall's dedicated SSH host CA with <code>services.marshall.sshHostCa.publicKey</code>, <code>keyFile</code> and <code>retirement</code>, alongside <code>services.marshall.ingress.zone</code>. Deliver the private signer only to Marshall through an encrypted secret output and list its preparation unit in <code>services.marshall.secretUnits</code>. Follow the <a href="https://github.com/ghuntley/overalls/blob/trunk/secrets/README.md#ssh-host-ca">SSH host CA custody procedure ↗</a>.</p>
+<p>Porsche presents a host certificate signed by that CA. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/provisioner-enrollment.md">docs/operations/provisioner-enrollment.md <span aria-hidden="true">↗</span></a></p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/ubuntu-guests.md">docs/guests/ubuntu-guests.md <span aria-hidden="true">↗</span></a></p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/windows-guests.md">docs/guests/windows-guests.md <span aria-hidden="true">↗</span></a></p>

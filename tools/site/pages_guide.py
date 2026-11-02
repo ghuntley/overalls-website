@@ -162,18 +162,22 @@ tools/buck2 build //:check-module-configuration''')}
   imports = [ overalls.nixosModules.default ];
   services.marshall = {
     enable = true;
-    publicHost = "control.example.com";
+    publicHost = "example.com";
     replicaCount = 3;
     databaseConnectionBudget = 43;
     environmentFile = "/run/overalls-secrets/marshall.env";
     instances.node01 = {
       port = 4443;
+      fleetPort = 5443;
+      fleetBindAddress = "10.90.0.1";
+      fleetLoopback = true;
       certificateFile = "/run/overalls-secrets/backend.crt";
       keyFile = "/run/overalls-secrets/backend.key";
     };
   };
 }''')}
 <p>Here <code>overalls</code> is your flake input for the fork. Import <code>overalls.nixosModules.services.marshall</code> or <code>overalls.nixosModules.services.lilly</code> when you want an individual service. For a single server, set <code>replicaCount = 1</code> and use local PostgreSQL; that's the supported nonredundant layout (<a href="{ADR}0048-single-host-service-deployment.md">ADR-0048 ↗</a>). With automatic updates enabled, budget at least <code>replicaCount × (poolSize + 3) + 10</code> database connections.</p>
+<p>Marshall has separate browser and fleet HTTPS listeners. Point <code>control.internal.example</code> at your control plane's private address, replacing <code>10.90.0.1</code> above with that address. Lilly, Audi and Porsche use <code>https://control.internal.example:5443</code>; browsers use the public domain. The backend certificate must cover the private name as well as the public host, and each fleet client must trust its CA. Allow port 5443 only from fleet peers through your private network's firewall. The public browser listener refuses machine APIs. See the <a href="{DOCS}operations/fleet-network.md">fleet network reference ↗</a>.</p>
 
 <h2>3. Secrets</h2>
 <p><code>services.overallsSecrets</code> decrypts SOPS documents with the host's SSH-derived age key and publishes them under <code>/run/overalls-secrets/NAME</code>. Encrypt each document to the host and to your recovery users:</p>
@@ -186,7 +190,7 @@ tools/buck2 build //:check-module-configuration''')}
       secrets = [
         "DATABASE_URL" "MARSHALL_CLOAK_KEYS" "SECRET_KEY_BASE"
         "TOKEN_SIGNING_SECRET" "MARSHALL_SMTP_HOST" "MARSHALL_SMTP_USERNAME"
-        "MARSHALL_SMTP_PASSWORD" "MARSHALL_SMTP_CA_CERTFILE" "MARSHALL_MAIL_FROM"
+        "MARSHALL_SMTP_PASSWORD" "MARSHALL_MAIL_FROM"
       ];
     };
   };
@@ -207,10 +211,12 @@ tools/buck2 run //:secrets -- check''')}
 <tr><td><code>MARSHALL_CLOAK_KEYS</code></td><td>Encryption keyring. Keep old keys as long as data encrypted with them still exists.</td></tr>
 <tr><td><code>MARSHALL_SMTP_HOST</code> · <code>_USERNAME</code> · <code>_PASSWORD</code></td><td>Your relay. Plaintext SMTP isn't supported.</td></tr>
 <tr><td><code>MARSHALL_SMTP_TLS</code></td><td><code>implicit</code> (the default, port 465) or <code>starttls</code> (port 587)</td></tr>
+<tr><td><code>MARSHALL_SMTP_PORT</code> · <code>MARSHALL_SMTP_CA_CERTFILE</code></td><td>Optional port override and private-CA bundle path; otherwise use the TLS mode's default port and bundled public roots</td></tr>
 <tr><td><code>MARSHALL_MAIL_FROM</code></td><td>A verified sender, such as <code>noreply@your-domain.example</code></td></tr>
 <tr><td><code>PHX_HOST</code></td><td>The public host name used in sign-in links</td></tr>
 </tbody>
 </table>
+<p>Every name in a secret output's <code>secrets</code> list is required. If your relay needs STARTTLS, another port or a private CA, add the corresponding variables to both the encrypted document and the environment output above.</p>
 <p>Marshall won't start if its SMTP configuration is missing or invalid. Send a test to a mailbox you control before you open the deployment to other people.</p>
 
 <h2>5. TLS and certificates</h2>
@@ -283,26 +289,66 @@ def dns():
   zone = "apps.example.com";
   nameservers = [ "ns1.example.com" "ns2.example.com" ];
   mailbox = "hostmaster.example.com";
-  controlPlane = "https://example.com";
-  credentialFile = "/run/overalls-secrets/audi-dns/token";
+  controlPlane = "https://control.internal.example:5443";
+  caFile = "/etc/overalls/service-ca.crt";
+  credentialFile = "${config.services.overallsSecrets.bundles.audi-dns.directory}/token";
+  secretUnits = [ config.services.overallsSecrets.bundles.audi-dns.unit ];
   openFirewall = true;
 };''')}
-<p>Every Audi DNS host lists the same zone and the same set of nameservers. <code>mailbox</code> is the SOA contact address, written in DNS form. The module refuses fewer than two or more than eight nameservers.</p>
+<p>Every Audi DNS host lists the same zone and the same set of nameservers. <code>mailbox</code> is the SOA contact address, written in DNS form. The module refuses fewer than two or more than eight nameservers. <code>controlPlane</code> reaches Marshall's private fleet listener; install its CA at the <code>caFile</code> path.</p>
 
 <h2>4. Enroll Audi with Marshall</h2>
-<p>Each Audi DNS server and each gateway authenticates to Marshall with its own token. Issue the tokens with the operator CLI and write them to private files outside your checkout:</p>
+<p>Each Audi DNS server and each gateway authenticates to Marshall with its own token. Gateways need an enrolled Lilly host; complete <a href="enroll.html">host enrollment</a> before issuing their tokens. Issue the tokens with the operator CLI and write them to private files outside your checkout:</p>
 {sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' audi-dns-rotate audi-host1-dns /private/host1-dns.token
 bin/marshall eval 'Marshall.Operations.CLI.main()' audi-gateway-rotate audi-host1 HOST_UUID ADDRESS /private/host1.token''')}
 <p>Check each file with <code>audi-dns-verify</code> or <code>audi-gateway-verify</code>. Then encrypt the tokens into each host's secret documents with <code>tools/buck2 run //:secrets -- encrypt</code> and run <code>tools/buck2 run //:secrets -- check</code>. <code>HOST_UUID</code> is the enrolled Lilly host's ID, and <code>ADDRESS</code> is the gateway's public address.</p>
 
-<h2>5. Wildcard certificate</h2>
-<p>Marshall requests one Let's Encrypt certificate for <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it, and Marshall installs the certificate on every gateway. Machine hostnames get HTTPS without any per-machine records.</p>
+<h2>5. Enable each Audi gateway</h2>
+<p>On each enrolled Lilly host, enable the local connector and gateway. Move administrative SSH to port 2222 and verify access there before removing port 22, as described under <a href="enroll.html">Porsche setup</a>.</p>
+{code('''services.openssh.ports = [ 2222 ];
+services.lilly.ingress.enable = true;
+services.audi = {
+  enable = true;
+  bindAddress = "192.0.2.11";
+  hostId = config.services.lilly.hostId;
+  controlPlane = "https://control.internal.example:5443";
+  caFile = "/etc/overalls/service-ca.crt";
+  credentialFile = "${config.services.overallsSecrets.bundles.audi.directory}/token";
+  secretUnits = [ config.services.overallsSecrets.bundles.audi.unit ];
+  openFirewall = true;
+  tls = {
+    enable = true;
+    zone = "apps.example.com";
+    browserOrigin = "https://example.com";
+  };
+};''')}
+<p>Replace <code>192.0.2.11</code> with the public service address assigned to this host and enrolled as <code>ADDRESS</code> above. If Porsche shares the host, it needs a different explicit address, such as the primary <code>192.0.2.10</code> in the enrollment guide. Audi uses its service address for ports 22, 80 and 443. Its local Lilly identity and the enrolled gateway's <code>HOST_UUID</code> must match.</p>
 
-<h2>6. Validate</h2>
+<h2>6. Configure the wildcard issuer</h2>
+<p>Set the same ingress zone on every Marshall host, Audi gateway and DNS replica. Configure one Marshall instance to request the fleet's Let's Encrypt wildcard:</p>
+{code('''services.marshall.ingress = {
+  zone = "apps.example.com";
+  wildcardAcme = {
+    issuerInstance = "node01";
+    directory = "https://acme-v02.api.letsencrypt.org/directory";
+    issuerCaFile = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    certificateRootsFile = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    # Set only after accepting the selected CA's terms.
+    acceptTerms = true;
+    nameservers = [
+      { address = "192.0.2.11"; }
+      { address = "198.51.100.11"; }
+    ];
+  };
+};''')}
+<p><code>node01</code> matches the local instance in the <a href="deploy.html">deployment example</a>. Put <code>wildcardAcme</code> on that issuer's host and replace the nameserver addresses with your two to eight authoritative Audi DNS replicas. Audi trusts Let's Encrypt's delivered chain through the public CA bundle by default; <code>caFile</code> above separately authenticates the private Marshall endpoint.</p>
+<p>Marshall requests <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it. Marshall installs the certificate on each gateway and waits for its installation receipt before publishing machine routes. Establish <a href="operations.html">database and Cloak-keyring backups</a> before relying on the wildcard, and configure Marshall's SSH host CA as described in <a href="enroll.html">gateway setup</a>.</p>
+
+<h2>7. Validate</h2>
 {sh('''dig @ns1.example.com apps.example.com SOA
 dig @ns2.example.com apps.example.com SOA
 dig +trace apps.example.com NS''')}
-<p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering.</p>
+<p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering. In <strong>Administrator audit → Certificates</strong>, check the active wildcard generation and an installation receipt from every gateway. Verify an actual machine hostname over HTTPS through each enrolled gateway address.</p>
 {ref("services/audi.md", "docs/services/audi.md")}
 {ref("operations/fleet-network.md", "docs/operations/fleet-network.md")}
 """
@@ -319,12 +365,13 @@ def enroll():
 <h2>1. Declare the Lilly role</h2>
 <p>Add this to the host's <code>host.json</code> <em>before</em> installing, so the base system includes the identity helper:</p>
 {code('''"lilly": {
-  "controlPlane": "https://marshall.example.com",
+  "controlPlane": "https://control.internal.example:5443",
   "egressInterface": "eth0",
   "credentialTtlSeconds": 157680000,
   "overheads": {"cores": 1, "memoryBytes": 1073741824, "storageBytes": 1073741824}
 }''')}
 <p>Host names for Lilly hosts can be at most 26 characters. Don't set Lilly host or pool IDs by hand; they're generated.</p>
+<p>The control-plane URL reaches Marshall's private fleet listener. If it uses your own CA, set <code>services.lilly.controlPlaneCAFile</code> in the host's <code>configuration.nix</code> to the installed CA bundle, such as <code>/etc/overalls/service-ca.crt</code>.</p>
 
 <h2>2. Prepare the enrollment</h2>
 <p>Deploy the Marshall release and its migration first. Then, from your checkout:</p>
@@ -368,15 +415,19 @@ Encrypt the token into that host's <code>porsche</code> secret bundle as <code>P
 {code('''services.openssh.ports = [ 2222 ];
 services.porsche = {
   enable = true;
-  controlPlane = "https://example.com";
+  bindAddress = "192.0.2.10";
+  controlPlane = "https://control.internal.example:5443";
   publicOrigin = "https://example.com";
+  caFile = "/etc/overalls/service-ca.crt";
   credentialFile = "${config.services.overallsSecrets.bundles.porsche.directory}/token";
   secretUnits = [ config.services.overallsSecrets.bundles.porsche.unit ];
   openFirewall = true;
 };''')}
 </li>
 </ol>
-<p>Porsche presents an SSH host certificate signed by Marshall's SSH host CA, set with <code>services.marshall.sshHostCa</code>. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
+<p>Replace <code>192.0.2.10</code> with the host's primary public address. When Audi shares this host, bind its gateway to a different explicit service address: both gateways listen on port 22, and Audi also needs ports 80 and 443. The modules reject overlapping SSH listeners. Keep <code>publicOrigin</code> on the public browser domain; <code>controlPlane</code> uses the private fleet endpoint.</p>
+<p>Before starting either gateway, configure Marshall's dedicated SSH host CA with <code>services.marshall.sshHostCa.publicKey</code>, <code>keyFile</code> and <code>retirement</code>, alongside <code>services.marshall.ingress.zone</code>. Deliver the private signer only to Marshall through an encrypted secret output and list its preparation unit in <code>services.marshall.secretUnits</code>. Follow the <a href="{SOURCE_BLOB}secrets/README.md#ssh-host-ca">SSH host CA custody procedure ↗</a>.</p>
+<p>Porsche presents a host certificate signed by that CA. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
 {ref("operations/provisioner-enrollment.md", "docs/operations/provisioner-enrollment.md")}
 {ref("guests/ubuntu-guests.md", "docs/guests/ubuntu-guests.md")}
 {ref("guests/windows-guests.md", "docs/guests/windows-guests.md")}
@@ -446,27 +497,30 @@ sudo systemctl stop overalls-auto-update.timer   # before manual recovery''')}
 
 <h2>Drain a host for maintenance</h2>
 {sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' drain HOST_UUID REQUEST_UUID ops:ticket-123
-bin/marshall eval 'Marshall.Operations.CLI.main()' drain-status REQUEST_UUID
-bin/marshall eval 'Marshall.Operations.CLI.main()' resume-host REQUEST_UUID
-bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID''')}
-<p>Drain before rebooting or replacing a host. Stopping Lilly's VM slice doesn't count as confirmed cleanup. Guests keep running when the Lilly daemon itself restarts.</p>
+bin/marshall eval 'Marshall.Operations.CLI.main()' drain-status REQUEST_UUID''')}
+<p>Drain stops the host's guests and retains their disks and host assignments. Before maintenance, require <code>status=drained</code> and <code>currently_quiescent=true</code> from <code>drain-status</code>. Stopping Lilly's VM slice doesn't count as confirmed cleanup. Guests keep running when the Lilly daemon itself restarts.</p>
+<p>After maintenance, wait for a fresh ready report, then resume admission:</p>
+{sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' resume-host REQUEST_UUID''')}
+<p>Resume closes the drain and leaves guests stopped for their owners to start. For permanent retirement instead, keep the drain open, have owners delete retained machines, and wait for physical cleanup and fresh empty-pool reports. Then retire:</p>
+{sh('''bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID''')}
 
 <h2>Move machines between hosts</h2>
-<p>Owners, managers and team admins can relocate a stopped machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
+<p>Owners, managers and team admins can relocate a machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Running moves involve downtime. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
 
 <h2>Backups</h2>
+<p>First provision each host's encrypted backup document with an independently generated <code>RESTIC_PASSWORD</code> and the S3 provider's <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code>. The fleet profile publishes the password and S3 environment files under <code>/run/overalls-secrets/backup</code>. Keep recovery identities outside the node and verify recovery decryption before relying on the repository. Follow the <a href="{DOCS}operations/backups.md#secret-custody">secret custody procedure ↗</a>.</p>
 {code('''services.overallsBackups = {
   enable = true;
-  postgres.enable = true;
   s3 = {
     endpoint = "https://objects.example.com";
     bucket = "node-recovery";
+    region = "your-region";
   };
 };''')}
 {sh('''overalls-backup list
 overalls-backup check
 overalls-backup read-check''')}
-<p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of Marshall's PostgreSQL; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
+<p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of PostgreSQL on Marshall hosts; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
 <h2>Logs and metrics</h2>
 <p><code>services.overallsLogging</code> sends journals from Marshall, Lilly, Porsche, HAProxy and the system to CloudWatch, OTLP or a fleet log store, with a bounded on-disk queue. Ziggy and Galileo record usage per account.</p>
 

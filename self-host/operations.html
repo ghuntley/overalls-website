@@ -113,22 +113,27 @@ sudo systemctl stop overalls-auto-update.timer   # before manual recovery</pre>
 
 <h2>Drain a host for maintenance</h2>
 <pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' drain HOST_UUID REQUEST_UUID ops:ticket-123
-bin/marshall eval 'Marshall.Operations.CLI.main()' drain-status REQUEST_UUID
-bin/marshall eval 'Marshall.Operations.CLI.main()' resume-host REQUEST_UUID
-bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre>
+bin/marshall eval 'Marshall.Operations.CLI.main()' drain-status REQUEST_UUID</pre>
 
-<p>Drain before rebooting or replacing a host. Stopping Lilly's VM slice doesn't count as confirmed cleanup. Guests keep running when the Lilly daemon itself restarts.</p>
+<p>Drain stops the host's guests and retains their disks and host assignments. Before maintenance, require <code>status=drained</code> and <code>currently_quiescent=true</code> from <code>drain-status</code>. Stopping Lilly's VM slice doesn't count as confirmed cleanup. Guests keep running when the Lilly daemon itself restarts.</p>
+<p>After maintenance, wait for a fresh ready report, then resume admission:</p>
+<pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' resume-host REQUEST_UUID</pre>
+
+<p>Resume closes the drain and leaves guests stopped for their owners to start. For permanent retirement instead, keep the drain open, have owners delete retained machines, and wait for physical cleanup and fresh empty-pool reports. Then retire:</p>
+<pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre>
+
 
 <h2>Move machines between hosts</h2>
-<p>Owners, managers and team admins can relocate a stopped machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
+<p>Owners, managers and team admins can relocate a machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Running moves involve downtime. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
 
 <h2>Backups</h2>
+<p>First provision each host's encrypted backup document with an independently generated <code>RESTIC_PASSWORD</code> and the S3 provider's <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code>. The fleet profile publishes the password and S3 environment files under <code>/run/overalls-secrets/backup</code>. Keep recovery identities outside the node and verify recovery decryption before relying on the repository. Follow the <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/backups.md#secret-custody">secret custody procedure ↗</a>.</p>
 <pre data-copy>services.overallsBackups = {
   enable = true;
-  postgres.enable = true;
   s3 = {
     endpoint = "https://objects.example.com";
     bucket = "node-recovery";
+    region = "your-region";
   };
 };</pre>
 
@@ -136,7 +141,7 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre
 overalls-backup check
 overalls-backup read-check</pre>
 
-<p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of Marshall's PostgreSQL; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
+<p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of PostgreSQL on Marshall hosts; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
 <h2>Logs and metrics</h2>
 <p><code>services.overallsLogging</code> sends journals from Marshall, Lilly, Porsche, HAProxy and the system to CloudWatch, OTLP or a fleet log store, with a bounded on-disk queue. Ziggy and Galileo record usage per account.</p>
 

@@ -5,7 +5,7 @@ blocks. Usage: python3 -I check.py SITE_ROOT
 import re, sys, pathlib, html.parser, urllib.parse
 # Other origins pages may load resources from (Simple Analytics via api.ghuntley.com).
 ALLOWED_RESOURCE_HOSTS = {'api.ghuntley.com'}
-root = pathlib.Path(sys.argv[1]); bad = []; ext = set()
+root = pathlib.Path(sys.argv[1]).resolve(); bad = []; ext = set()
 class P(html.parser.HTMLParser):
     def __init__(s): super().__init__(); s.refs=[]; s.ids=set()
     def handle_starttag(s, tag, a):
@@ -19,15 +19,24 @@ for f in filter(visible, root.rglob('*.html')):
     p = P(); p.feed(f.read_text()); pages[f] = p
 for f, p in pages.items():
     for tag, k, v, rel in p.refs:
-        if v.startswith(('http://','https://')):
-            if tag in ('link','script','img') and rel not in ('canonical', 'alternate') and urllib.parse.urlparse(v).hostname not in ALLOWED_RESOURCE_HOSTS: bad.append(f'{f}: external resource {v}')
-            ext.add(v); continue
         u = urllib.parse.urlparse(v)
-        if f.name == '404.html' and v.startswith('/'): target = root / u.path.lstrip('/')
+        if u.netloc:
+            if tag in ('link','script','img') and rel not in ('canonical', 'alternate') and u.hostname not in ALLOWED_RESOURCE_HOSTS: bad.append(f'{f}: external resource {v}')
+            ext.add(v); continue
+        # Non-file hyperlinks (mailto:, tel:, etc.) do not name site files.
+        # Resources must use local paths or an admitted network origin. Reject
+        # HTTP(S) without a host rather than disagree with browser URL parsing.
+        if u.scheme:
+            if tag in ('a', 'area') and u.scheme not in ('http', 'https'): continue
+            bad.append(f'{f}: unsupported URL {v}')
+            continue
+        path = urllib.parse.unquote(u.path)
+        if path.startswith('/'): target = (root / path.lstrip('/')).resolve()
         elif not u.path: target = f
-        else: target = (f.parent / u.path).resolve()
+        else: target = (f.parent / path).resolve()
+        if target.is_dir() or path.endswith('/'): target = target / 'index.html'
         if not target.exists(): bad.append(f'{f.relative_to(root)}: missing {v}')
-        if u.fragment and target in pages and u.fragment not in pages[target].ids: bad.append(f'{f}: bad anchor {v}')
+        if u.fragment and target in pages and urllib.parse.unquote(u.fragment) not in pages[target].ids: bad.append(f'{f}: bad anchor {v}')
 css_files = sorted(filter(visible, root.rglob('site.css')))
 if not css_files: sys.exit('no site.css found under ' + str(root))
 css = css_files[0].read_text()
@@ -38,3 +47,4 @@ for m in re.finditer(r'#[0-9a-fA-F]{3,6}\b|rgba?\(|hsl|color-mix', body):
 if re.search(r'url\(https?:|@import', css): bad.append('external css')
 print('\n'.join(bad) or 'OK: no problems')
 print(len(ext), 'external links:'); print('\n'.join(sorted(ext)))
+sys.exit(bool(bad))

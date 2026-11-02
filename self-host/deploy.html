@@ -114,12 +114,15 @@ tools/buck2 build //:check-module-configuration</pre>
   imports = [ overalls.nixosModules.default ];
   services.marshall = {
     enable = true;
-    publicHost = "control.example.com";
+    publicHost = "example.com";
     replicaCount = 3;
     databaseConnectionBudget = 43;
     environmentFile = "/run/overalls-secrets/marshall.env";
     instances.node01 = {
       port = 4443;
+      fleetPort = 5443;
+      fleetBindAddress = "10.90.0.1";
+      fleetLoopback = true;
       certificateFile = "/run/overalls-secrets/backend.crt";
       keyFile = "/run/overalls-secrets/backend.key";
     };
@@ -127,6 +130,7 @@ tools/buck2 build //:check-module-configuration</pre>
 }</pre>
 
 <p>Here <code>overalls</code> is your flake input for the fork. Import <code>overalls.nixosModules.services.marshall</code> or <code>overalls.nixosModules.services.lilly</code> when you want an individual service. For a single server, set <code>replicaCount = 1</code> and use local PostgreSQL; that's the supported nonredundant layout (<a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 ↗</a>). With automatic updates enabled, budget at least <code>replicaCount × (poolSize + 3) + 10</code> database connections.</p>
+<p>Marshall has separate browser and fleet HTTPS listeners. Point <code>control.internal.example</code> at your control plane's private address, replacing <code>10.90.0.1</code> above with that address. Lilly, Audi and Porsche use <code>https://control.internal.example:5443</code>; browsers use the public domain. The backend certificate must cover the private name as well as the public host, and each fleet client must trust its CA. Allow port 5443 only from fleet peers through your private network's firewall. The public browser listener refuses machine APIs. See the <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/fleet-network.md">fleet network reference ↗</a>.</p>
 
 <h2>3. Secrets</h2>
 <p><code>services.overallsSecrets</code> decrypts SOPS documents with the host's SSH-derived age key and publishes them under <code>/run/overalls-secrets/NAME</code>. Encrypt each document to the host and to your recovery users:</p>
@@ -139,7 +143,7 @@ tools/buck2 build //:check-module-configuration</pre>
       secrets = [
         "DATABASE_URL" "MARSHALL_CLOAK_KEYS" "SECRET_KEY_BASE"
         "TOKEN_SIGNING_SECRET" "MARSHALL_SMTP_HOST" "MARSHALL_SMTP_USERNAME"
-        "MARSHALL_SMTP_PASSWORD" "MARSHALL_SMTP_CA_CERTFILE" "MARSHALL_MAIL_FROM"
+        "MARSHALL_SMTP_PASSWORD" "MARSHALL_MAIL_FROM"
       ];
     };
   };
@@ -162,10 +166,12 @@ tools/buck2 run //:secrets -- check</pre>
 <tr><td><code>MARSHALL_CLOAK_KEYS</code></td><td>Encryption keyring. Keep old keys as long as data encrypted with them still exists.</td></tr>
 <tr><td><code>MARSHALL_SMTP_HOST</code> · <code>_USERNAME</code> · <code>_PASSWORD</code></td><td>Your relay. Plaintext SMTP isn't supported.</td></tr>
 <tr><td><code>MARSHALL_SMTP_TLS</code></td><td><code>implicit</code> (the default, port 465) or <code>starttls</code> (port 587)</td></tr>
+<tr><td><code>MARSHALL_SMTP_PORT</code> · <code>MARSHALL_SMTP_CA_CERTFILE</code></td><td>Optional port override and private-CA bundle path; otherwise use the TLS mode's default port and bundled public roots</td></tr>
 <tr><td><code>MARSHALL_MAIL_FROM</code></td><td>A verified sender, such as <code>noreply@your-domain.example</code></td></tr>
 <tr><td><code>PHX_HOST</code></td><td>The public host name used in sign-in links</td></tr>
 </tbody>
 </table>
+<p>Every name in a secret output's <code>secrets</code> list is required. If your relay needs STARTTLS, another port or a private CA, add the corresponding variables to both the encrypted document and the environment output above.</p>
 <p>Marshall won't start if its SMTP configuration is missing or invalid. Send a test to a mailbox you control before you open the deployment to other people.</p>
 
 <h2>5. TLS and certificates</h2>

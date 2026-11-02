@@ -142,29 +142,71 @@
   zone = "apps.example.com";
   nameservers = [ "ns1.example.com" "ns2.example.com" ];
   mailbox = "hostmaster.example.com";
-  controlPlane = "https://example.com";
-  credentialFile = "/run/overalls-secrets/audi-dns/token";
+  controlPlane = "https://control.internal.example:5443";
+  caFile = "/etc/overalls/service-ca.crt";
+  credentialFile = "${config.services.overallsSecrets.bundles.audi-dns.directory}/token";
+  secretUnits = [ config.services.overallsSecrets.bundles.audi-dns.unit ];
   openFirewall = true;
 };</pre>
 
-<p>Every Audi DNS host lists the same zone and the same set of nameservers. <code>mailbox</code> is the SOA contact address, written in DNS form. The module refuses fewer than two or more than eight nameservers.</p>
+<p>Every Audi DNS host lists the same zone and the same set of nameservers. <code>mailbox</code> is the SOA contact address, written in DNS form. The module refuses fewer than two or more than eight nameservers. <code>controlPlane</code> reaches Marshall's private fleet listener; install its CA at the <code>caFile</code> path.</p>
 
 <h2>4. Enroll Audi with Marshall</h2>
-<p>Each Audi DNS server and each gateway authenticates to Marshall with its own token. Issue the tokens with the operator CLI and write them to private files outside your checkout:</p>
+<p>Each Audi DNS server and each gateway authenticates to Marshall with its own token. Gateways need an enrolled Lilly host; complete <a href="enroll.html">host enrollment</a> before issuing their tokens. Issue the tokens with the operator CLI and write them to private files outside your checkout:</p>
 <pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' audi-dns-rotate audi-host1-dns /private/host1-dns.token
 bin/marshall eval 'Marshall.Operations.CLI.main()' audi-gateway-rotate audi-host1 HOST_UUID ADDRESS /private/host1.token</pre>
 
 <p>Check each file with <code>audi-dns-verify</code> or <code>audi-gateway-verify</code>. Then encrypt the tokens into each host's secret documents with <code>tools/buck2 run //:secrets -- encrypt</code> and run <code>tools/buck2 run //:secrets -- check</code>. <code>HOST_UUID</code> is the enrolled Lilly host's ID, and <code>ADDRESS</code> is the gateway's public address.</p>
 
-<h2>5. Wildcard certificate</h2>
-<p>Marshall requests one Let's Encrypt certificate for <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it, and Marshall installs the certificate on every gateway. Machine hostnames get HTTPS without any per-machine records.</p>
+<h2>5. Enable each Audi gateway</h2>
+<p>On each enrolled Lilly host, enable the local connector and gateway. Move administrative SSH to port 2222 and verify access there before removing port 22, as described under <a href="enroll.html">Porsche setup</a>.</p>
+<pre data-copy>services.openssh.ports = [ 2222 ];
+services.lilly.ingress.enable = true;
+services.audi = {
+  enable = true;
+  bindAddress = "192.0.2.11";
+  hostId = config.services.lilly.hostId;
+  controlPlane = "https://control.internal.example:5443";
+  caFile = "/etc/overalls/service-ca.crt";
+  credentialFile = "${config.services.overallsSecrets.bundles.audi.directory}/token";
+  secretUnits = [ config.services.overallsSecrets.bundles.audi.unit ];
+  openFirewall = true;
+  tls = {
+    enable = true;
+    zone = "apps.example.com";
+    browserOrigin = "https://example.com";
+  };
+};</pre>
 
-<h2>6. Validate</h2>
+<p>Replace <code>192.0.2.11</code> with the public service address assigned to this host and enrolled as <code>ADDRESS</code> above. If Porsche shares the host, it needs a different explicit address, such as the primary <code>192.0.2.10</code> in the enrollment guide. Audi uses its service address for ports 22, 80 and 443. Its local Lilly identity and the enrolled gateway's <code>HOST_UUID</code> must match.</p>
+
+<h2>6. Configure the wildcard issuer</h2>
+<p>Set the same ingress zone on every Marshall host, Audi gateway and DNS replica. Configure one Marshall instance to request the fleet's Let's Encrypt wildcard:</p>
+<pre data-copy>services.marshall.ingress = {
+  zone = "apps.example.com";
+  wildcardAcme = {
+    issuerInstance = "node01";
+    directory = "https://acme-v02.api.letsencrypt.org/directory";
+    issuerCaFile = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    certificateRootsFile = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    # Set only after accepting the selected CA's terms.
+    acceptTerms = true;
+    nameservers = [
+      { address = "192.0.2.11"; }
+      { address = "198.51.100.11"; }
+    ];
+  };
+};</pre>
+
+<p><code>node01</code> matches the local instance in the <a href="deploy.html">deployment example</a>. Put <code>wildcardAcme</code> on that issuer's host and replace the nameserver addresses with your two to eight authoritative Audi DNS replicas. Audi trusts Let's Encrypt's delivered chain through the public CA bundle by default; <code>caFile</code> above separately authenticates the private Marshall endpoint.</p>
+<p>Marshall requests <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it. Marshall installs the certificate on each gateway and waits for its installation receipt before publishing machine routes. Establish <a href="operations.html">database and Cloak-keyring backups</a> before relying on the wildcard, and configure Marshall's SSH host CA as described in <a href="enroll.html">gateway setup</a>.</p>
+
+<h2>7. Validate</h2>
 <pre data-copy>dig @ns1.example.com apps.example.com SOA
 dig @ns2.example.com apps.example.com SOA
 dig +trace apps.example.com NS</pre>
 
-<p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering.</p>
+<p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering. In <strong>Administrator audit → Certificates</strong>, check the active wildcard generation and an installation receipt from every gateway. Verify an actual machine hostname over HTTPS through each enrolled gateway address.</p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/services/audi.md">docs/services/audi.md <span aria-hidden="true">↗</span></a></p>
 <p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/fleet-network.md">docs/operations/fleet-network.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="deploy.html">← Deploy the control plane</a><a href="enroll.html">Enroll hosts and images →</a></nav>

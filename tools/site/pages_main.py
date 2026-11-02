@@ -60,13 +60,13 @@ FEATURES = [
      "environments don't belong to whoever happened to create them."),
     ("Clone, resize, relocate", "stable",
      "Clone a machine into an independent copy. Resize CPU and memory up or down, and grow the disk. "
-     "Move a stopped machine to another host; it keeps its name, identity and address."),
+     "Move a machine to another host; it keeps its name, identity and address. Running moves involve downtime."),
     ("Caching HTTP proxy", "stable",
      "Guest downloads from apt, Nix, pip, npm and the like go through Brady. It fetches only from verified upstreams "
      "and caches public, anonymous responses, so the second machine to install a package gets it from the cache."),
     ("Locked-down profile", "stable",
-     "For customer material: no outbound network, no sharing, no web exposure, and SSH for the "
-     "owner only."),
+     "For customer material: outbound networking, sharing and web apps are blocked. The owner can use "
+     "SSH, the browser terminal and a personal browser editor."),
     ("Repo launch links", "stable",
      "<code>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</code> creates a new machine "
      "with that repo cloned into <code>/workspace/REPO</code>. Add <code>/tree/BRANCH</code>, "
@@ -211,7 +211,7 @@ def landing():
 <div class="hero">
 <div>
 <h1>An AI-first developer platform <span class="line">that you own.</span></h1>
-<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM. Choose NixOS, Ubuntu, Arch Linux, AlmaLinux, FreeBSD, OmniOS or Windows, and keep its disk, name and address when you stop, start, resize, clone or move it.</p>
+<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM. Choose NixOS, Ubuntu, Arch Linux, AlmaLinux, FreeBSD, OmniOS or Windows, and keep its disk, name and address when you stop, start, resize or move it. Cloning makes an independent copy with a new name, identity and address.</p>
 <p class="lede">Overalls has its own agent built in: start a thread on any machine from the browser or the CLI, and it keeps working after you close your laptop, waking the machine if it was stopped. It's the Amp orbs workflow on hardware you own.</p>
 <p class="lede">NixOS and Ubuntu include Claude Code and Codex, configured for your deployment's inference providers, with provider keys kept outside the machine. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Mila's native desktop and mobile clients are in preview. Put hosts in every region your team works in.</p>
 <p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
@@ -372,22 +372,24 @@ ARCH_CONTROL = """\
                  └─────────────┘             └─────────────┘"""
 
 ARCH_LIFECYCLE = """\
-  new ─▶ [pending] ─▶ [running] ◀─── start ─── [stopped]
-                        │    │                    ▲  │
-                        │    └─── stop ───────────┘  │
-                        │                            ├─ relocate ─▶ another host
-                     resize                          ├─ clone ────▶ new machine
-           stop · apply · restart                    ├─ resize ───▶ at next boot
-                                                     └─ rm ───────▶ disk deleted"""
+  new ─▶ [pending] ─▶ [running] ◀── start ─── [stopped]
+                          │  │                    ▲
+                          │  └────── stop ────────┤
+                          │                       │
+                          └───────┬───────────────┘
+                                  ├─ relocate ─▶ another host
+                                  ├─ clone ────▶ new private identity and disk
+                                  ├─ resize ───▶ CPU, memory and disk size
+                                  └─ rm ───────▶ disk deleted"""
 
 ARCH_GUEST = """\
-  ┌─ guest ──────────────────────────┐
-  │  apt · nix · pip · npm ──────────┼──▶ Brady    proxy, cache ──▶ internet
-  │  git clone ──────────────────────┼──▶ Enrico   GitHub mirror
-  │  https://llm.internal ───────────┼──▶ Ziggy    ──▶ OpenAI, Anthropic
-  │  https://x.integration.internal ─┼──▶ Galileo  adds credentials
-  └──────────────────────────────────┘
-    secrets stay outside the guest; usage is recorded per account"""
+  ┌─ guest ─────────────────────────────┐
+  │ apt · nix · pip · npm ──────────────┼──▶ Brady · proxy and cache ─▶ internet
+  │ https://llm.internal ───────────────┼──▶ Ziggy ─▶ OpenAI, Anthropic
+  │ https://x.integration.internal ─────┼──▶ Galileo · adds credentials
+  └─────────────────────────────────────┘
+
+  platform credentials stay outside the guest; usage is recorded per account"""
 
 COMPONENTS = [
     ("Marshall", "marshall/", "Web app and control plane (Elixir, Phoenix, Ash)",
@@ -397,11 +399,11 @@ COMPONENTS = [
     ("Porsche", "porsche/", "SSH management gateway",
      "<code>ssh &lt;gateway&gt; &lt;command&gt;</code> manages machines with the same account and permissions as the web."),
     ("Audi", "audi/", "DNS and ingress",
-     "Authoritative DNS, guest SSH, and public HTTPS for each machine's web apps."),
+     "Authoritative DNS and ingress for guest SSH, public web apps and personal browser editors."),
     ("Brady", "brady/", "Egress proxy and cache",
      "Guest downloads go through verified upstreams, and public anonymous responses are cached."),
-    ("Enrico", "enrico/", "Private GitHub mirror",
-     "Speeds up checkouts and powers the repository browser."),
+    ("Enrico", "enrico/", "Read-only GitHub mirror",
+     "Caches registered public GitHub repositories for Marshall's repository browser."),
     ("Galileo", "galileo/", "Integration gateway",
      "Named integrations at <code>&lt;name&gt;.integration.internal</code>; credentials are added at the edge."),
     ("Ziggy", "ziggy/", "Inference proxy",
@@ -431,11 +433,11 @@ ADRS = [
     ("0048-single-host-service-deployment.md", "Single-host service deployment"),
     ("0055-queued-machine-cloning.md", "Queued machine cloning"),
     ("0077-teams-and-shared-resources.md", "Teams and shared resources"),
-    ("0128-repository-launch-links.md", "Repository launch links"),
     ("0153-official-source-browser-editor.md", "Official-source browser editor"),
-    ("0155-stopped-only-relocation.md", "Stopped-only relocation"),
+    ("0157-multi-provider-authenticated-repository-launch.md", "Multi-provider repository launch"),
     ("0161-monospace-web-presentation.md", "Monospace Web presentation"),
     ("0190-native-kernel-provenance-and-admission.md", "Native guest kernels and image admission"),
+    ("0199-memory-suspension-and-demand-wake.md", "Suspension, relocation and demand wake"),
     ("0249-mila-rust-core-native-clients.md", "Mila's Rust core and native clients"),
     ("0269-buck2-build-system-with-nix-toolchains.md", "Buck2 builds with Nix toolchains"),
     ("0271-buck2-host-self-deployment.md", "Host self-deployment through Buck2"),
@@ -482,7 +484,7 @@ def architecture():
 <h2 id="arch-regions">Regions</h2>
 <div class="prose">
 <p>We recommend running Marshall in a single region. Its instances share one PostgreSQL, and admission, sharing and lifecycle decisions all depend on that database, so keep them close to it. Run several instances in that region for high availability.</p>
-<p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work.</p>
+<p>Lilly hosts connect to Marshall over HTTPS, so you can put hosts in every region where your developers work. Cross-host cloning and relocation also require reachable, authenticated transfer SSH endpoints.</p>
 <p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, shared web apps and the browser editor enter through Audi on the machine's own host. Their data stays in that region, while Marshall authorises access. The browser terminal is relayed through Marshall, over the connection the host dialled out, so it pays the round trip to the control-plane region.</p>
 </div>
 <figure class="diagram">
@@ -498,10 +500,10 @@ def architecture():
 <section aria-labelledby="lifecycle">
 <h2 id="lifecycle">A machine's life</h2>
 <div class="prose">
-<p>A machine is an identity first and a process second. Its UUID, name, private address, sharing and disk outlive any particular Firecracker process, so stopping, resizing and relocating it don't create a new machine. Cloning does: the copy is private, gets a fresh address and starts without the source's RAM.</p>
+<p>A machine is an identity first and a process second. Its UUID, name, private address, sharing and disk outlive any particular Firecracker process, so stopping, resizing and relocating it don't create a new machine. Running relocations involve downtime. Cloning creates an independent machine: the copy is private, gets a new identity, name and address, and starts without the source's RAM.</p>
 </div>
 <figure class="diagram">
-<pre role="img" aria-label="A new machine goes from pending to running. Running machines can be stopped or resized. Stopped machines can be started, relocated to another host, cloned into a new private machine, or deleted.">{ARCH_LIFECYCLE}</pre>
+<pre role="img" aria-label="A new machine goes from pending to running. Machines can be stopped, started, resized, relocated to another host, cloned into an independent private machine, or deleted. Running relocations involve downtime.">{ARCH_LIFECYCLE}</pre>
 <figcaption>Every transition is a durable request with an ID you can retry.</figcaption>
 </figure>
 </section>
@@ -509,10 +511,10 @@ def architecture():
 <section aria-labelledby="guest">
 <h2 id="guest">From inside a guest</h2>
 <div class="prose">
-<p>Guests reach the outside world only through services that can check, cache and record the traffic. Lateral traffic between guests and to private address ranges is blocked by Lilly's nftables policy. The locked-down customer profile removes outbound networking entirely.</p>
+<p>Guests reach the outside world through services that can check, cache and record the traffic. Brady handles public HTTP and HTTPS, Ziggy handles inference, and Galileo handles integrations. Enrico serves Marshall's repository browser. Lateral traffic between guests and to private address ranges is blocked by Lilly's nftables policy. The locked-down customer profile removes outbound networking entirely.</p>
 </div>
 <figure class="diagram">
-<pre role="img" aria-label="Package downloads from a guest go through Brady, git clones through Enrico, inference calls through Ziggy, and integration calls through Galileo, which adds credentials so the guest never sees them.">{ARCH_GUEST}</pre>
+<pre role="img" aria-label="Public HTTP and HTTPS downloads from a guest go through Brady, inference calls through Ziggy, and integration calls through Galileo, which adds credentials so the guest never sees them.">{ARCH_GUEST}</pre>
 <figcaption>Credentials are added at the edge, never handed to the guest.</figcaption>
 </figure>
 </section>
