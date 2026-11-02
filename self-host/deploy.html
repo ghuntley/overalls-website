@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -97,17 +97,17 @@
 <h1>Deploy the control plane</h1>
 <p>Marshall and Lilly are NixOS modules exported by the flake. Enabling one doesn't enable the other. The host's <code>configuration.nix</code> chooses its roles, and secrets arrive as encrypted documents that are decrypted on the host.</p>
 <dl class="kv">
-<div><dt>Modules</dt><dd><code>nixosModules.default</code>, or <code>marshall</code>, <code>lilly</code>, <code>proxy</code>, <code>acme</code>, <code>secrets</code> and <code>backups</code> individually</dd></div>
+<div><dt>Modules</dt><dd><code>nixosModules.default</code>, or individual modules under <code>nixosModules.services</code>, <code>.network</code>, <code>.security</code> and <code>.storage</code></dd></div>
 <div><dt>Target</dt><dd><code>x86_64-linux</code>, NixOS 26.05</dd></div>
 </dl>
 
 <h2>1. Build and check</h2>
-<pre data-copy>nix build .#marshall .#lilly
-nix build .#checks.x86_64-linux.marshall-release
-nix build .#checks.x86_64-linux.lilly-release
-nix build .#checks.x86_64-linux.module-configuration</pre>
+<pre data-copy>tools/buck2 build //:package-service-marshall //:package-service-lilly
+tools/buck2 build //:check-marshall-release
+tools/buck2 build //:check-lilly-release
+tools/buck2 build //:check-module-configuration</pre>
 
-<p>Release builds have no network access, and dependency hashes are pinned. No production secrets are needed to build.</p>
+<p>Run these commands from your fork. The <code>tools/buck2</code> wrapper selects the pinned Buck2 and toolchains. Release compilation has no network access, and dependency hashes are pinned. No production secrets are needed to build.</p>
 
 <h2>2. Enable Marshall</h2>
 <pre data-copy>{
@@ -117,20 +117,20 @@ nix build .#checks.x86_64-linux.module-configuration</pre>
     publicHost = "control.example.com";
     replicaCount = 3;
     databaseConnectionBudget = 43;
-    environmentFile = "/run/kittens-secrets/marshall.env";
+    environmentFile = "/run/overalls-secrets/marshall.env";
     instances.node01 = {
       port = 4443;
-      certificateFile = "/run/kittens-secrets/backend.crt";
-      keyFile = "/run/kittens-secrets/backend.key";
+      certificateFile = "/run/overalls-secrets/backend.crt";
+      keyFile = "/run/overalls-secrets/backend.key";
     };
   };
 }</pre>
 
-<p>Here <code>overalls</code> is your flake input for the fork. For a single server, set <code>replicaCount = 1</code> and use local PostgreSQL; that's the supported nonredundant layout (<a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 ↗</a>). With automatic updates enabled, budget at least <code>replicaCount × (poolSize + 3) + 10</code> database connections.</p>
+<p>Here <code>overalls</code> is your flake input for the fork. Import <code>overalls.nixosModules.services.marshall</code> or <code>overalls.nixosModules.services.lilly</code> when you want an individual service. For a single server, set <code>replicaCount = 1</code> and use local PostgreSQL; that's the supported nonredundant layout (<a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 ↗</a>). With automatic updates enabled, budget at least <code>replicaCount × (poolSize + 3) + 10</code> database connections.</p>
 
 <h2>3. Secrets</h2>
-<p><code>services.kittensSecrets</code> decrypts SOPS documents with the host's SSH-derived age key and publishes them under <code>/run/kittens-secrets/NAME</code>. Encrypt each document to the host and to your recovery users:</p>
-<pre data-copy>services.kittensSecrets = {
+<p><code>services.overallsSecrets</code> decrypts SOPS documents with the host's SSH-derived age key and publishes them under <code>/run/overalls-secrets/NAME</code>. Encrypt each document to the host and to your recovery users:</p>
+<pre data-copy>services.overallsSecrets = {
   enable = true;
   bundles.marshall = {
     encryptedFile = "${./secrets/marshall.enc.json}";
@@ -145,12 +145,12 @@ nix build .#checks.x86_64-linux.module-configuration</pre>
   };
 };
 services.marshall = {
-  environmentFile = "${config.services.kittensSecrets.bundles.marshall.directory}/environment";
-  secretUnits = [ config.services.kittensSecrets.bundles.marshall.unit ];
+  environmentFile = "${config.services.overallsSecrets.bundles.marshall.directory}/environment";
+  secretUnits = [ config.services.overallsSecrets.bundles.marshall.unit ];
 };</pre>
 
-<pre data-copy>nix build .#user-recipients --out-link result-recipient
-nix run .#secrets -- check</pre>
+<pre data-copy>tools/buck2 build //:package-security-user-recipients
+tools/buck2 run //:secrets -- check</pre>
 
 
 <h2>4. Database and email</h2>
@@ -181,13 +181,13 @@ security.acme.acceptTerms = true;</pre>
 
 <h2>6. Migrate, then switch</h2>
 <p>Serving instances never run migrations when they start. Instead, host enrollment and every automatic update run Marshall's migrations from the candidate release, under a PostgreSQL advisory lock, before the running services are stopped. Migrations must work with every release still serving, and a successful schema change is never rolled back automatically. Incompatible changes need a coordinated upgrade.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/nixos.md">docs/nixos.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/production-email.md">docs/production-email.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/nixos.md">docs/operations/nixos.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/production-email.md">docs/operations/production-email.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="provision.html">← Provision a host</a><a href="dns.html">Set up DNS →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

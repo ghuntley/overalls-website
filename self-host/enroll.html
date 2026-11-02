@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -114,7 +114,7 @@
 
 <h2>2. Prepare the enrollment</h2>
 <p>Deploy the Marshall release and its migration first. Then, from your checkout:</p>
-<pre data-copy>nix run .#host -- prepare-enrollment --host NAME --root . \
+<pre data-copy>tools/buck2 run //:host -- prepare-enrollment --host NAME --root . \
   --target admin@installed-host --marshall-target admin@marshall-host \
   --identity /private/admin-key --known-hosts /private/known-hosts \
   --install-receipt /private/host-plan.installed.json \
@@ -123,25 +123,28 @@
 <p>This registers a disabled host and writes the <code>NAME-git</code> and <code>NAME-lilly</code> ciphertext, plus public registration data in <code>lilly.binding</code>. It doesn't commit, push or enable anything. If it's interrupted, run the identical command again; its journal resumes the work without issuing a second credential.</p>
 
 <h2>3. Activate and enable</h2>
-<p>Push the changes and activate the commit with <code>nix run .#host -- enroll --revision …</code>, as in <a href="provision.html">provisioning</a>. Once the host reports ready, enable it from a Marshall host with the operator CLI:</p>
+<p>Push the changes and activate the commit with <code>tools/buck2 run //:host -- enroll --revision …</code>, as in <a href="provision.html">provisioning</a>. Once the host reports ready, enable it from a Marshall host with the operator CLI:</p>
 <pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' show NAME
 bin/marshall eval 'Marshall.Operations.CLI.main()' enable HOST_UUID</pre>
 
 <p>Operator commands run as a separate process with <code>PHX_SERVER=false</code>, never through a serving node's console. They print only public identities.</p>
 
 <h2>4. Guest images</h2>
-<p>Images are Nix builds with immutable <code>sha256:</code> digests. The fleet catalog in <code>fleet/guest-images.nix</code> lists the images each host stages. Pre-created standby disks make creation fast for images marked <code>standby = true</code>:</p>
+<p>Images have immutable <code>sha256:</code> identities. The shared catalog in <code>fleet/guest-images.nix</code> selects NixOS, Ubuntu, Arch Linux, AlmaLinux, Windows and the reviewed FreeBSD and OmniOS images, plus an experimental Android SDK variant of NixOS. Entries name packages from <code>overallsPackages</code>, for example:</p>
 <pre data-copy>[
-  { name = "NixOS"; package = kittensPackages.guest; standby = true; }
-  { name = "Ubuntu 26.04 LTS"; package = kittensPackages.ubuntuGuest; standby = true; }
-  { name = "Windows Server 2025"; package = kittensPackages.windowsGuestAgents; standby = false; }
+  { name = "NixOS"; package = overallsPackages.guest; }
+  { name = "Ubuntu 26.04 LTS"; package = overallsPackages.ubuntuGuest; }
+  { name = "Windows Server 2025"; package = overallsPackages.windowsGuestPublished; }
 ]</pre>
 
-<p>The Windows image isn't byte-identical from build to build, so build it once and <code>nix copy</code> it to every host before adding its entry. Build a customised Linux image with <code>mkUbuntuGuest</code>, or the NixOS guest builder with <code>extraModules</code>. Pin Ubuntu packages with <code>nix run .#ubuntu-lock</code>. Set <code>services.marshall.defaultImageId</code> to choose the default for new machines.</p>
-<pre data-copy>nix build .#ubuntu-guest
-ls result/
+<p>Use the same staged catalog on every Lilly host and register the selected manifests with Marshall. Lilly seals image templates within its configured budget and clones guest disks on demand. Set <code>services.marshall.defaultImageId</code> to a registered image to choose the default for new machines.</p>
+<p>Build the standard Ubuntu image through Buck2:</p>
+<pre data-copy>image=$(cat "$(tools/buck2 build --show-full-simple-output //:package-guest-ubuntu)")
+ls "$image"
 <span class="prompt out"># kernel  initrd  rootfs.ext4  manifest.json</span></pre>
 
+<p>For custom images, use <code>mkUbuntuGuest</code> with a reviewed APT lock, or the NixOS guest builder's <code>extraModules</code>. The <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/os-matrix.md">OS matrix ↗</a> records each family's capabilities and verification limits.</p>
+<p>Windows installation isn't byte-identical from build to build. <code>windowsGuestPublished</code> selects one sealed <code>windows-v1</code> image through the signed Overalls cache and refuses a cache miss. To update it, build once with the source builder, retain the installation evidence, seal <code>disk.raw</code>, <code>firmware</code> and <code>manifest.json</code>, and review their digests and recursive NAR hash. Update the publication and manifest pins together. Publish that exact directory, verify signature-checked substitution on every host, then activate the catalog. Follow the <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/windows-guests.md#fleet-publication">Windows publication procedure ↗</a>.</p>
 
 <h2>5. Porsche on your Marshall hosts</h2>
 <p>Porsche, the SSH gateway, runs on the same hosts as Marshall and listens on port 22 of the same public addresses your apex domain points at. Port 443 on those addresses serves the browser and port 22 serves Porsche, so people manage machines with <code>ssh &lt;your-domain&gt;</code>. There's no separate gateway address or DNS record.</p>
@@ -158,22 +161,23 @@ services.porsche = {
   enable = true;
   controlPlane = "https://example.com";
   publicOrigin = "https://example.com";
-  credentialFile = "${config.services.kittensSecrets.bundles.porsche.directory}/token";
-  secretUnits = [ config.services.kittensSecrets.bundles.porsche.unit ];
+  credentialFile = "${config.services.overallsSecrets.bundles.porsche.directory}/token";
+  secretUnits = [ config.services.overallsSecrets.bundles.porsche.unit ];
   openFirewall = true;
 };</pre>
 
 </li>
 </ol>
 <p>Porsche presents an SSH host certificate signed by Marshall's SSH host CA, set with <code>services.marshall.sshHostCa</code>. The <code>overalls</code> installer adds that CA to people's <code>known_hosts</code>, so <code>ssh &lt;your-domain&gt;</code> verifies without trust-on-first-use. Porsche reports readiness on <code>/run/porsche/status.sock</code>, and automatic updates wait for it. Rotating a gateway credential ends that gateway's open sessions until it loads the new token.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/provisioner-enrollment.md">docs/provisioner-enrollment.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/ubuntu-guests.md">docs/ubuntu-guests.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/porsche-operations.md">docs/porsche-operations.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/provisioner-enrollment.md">docs/operations/provisioner-enrollment.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/ubuntu-guests.md">docs/guests/ubuntu-guests.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/guests/windows-guests.md">docs/guests/windows-guests.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/porsche-operations.md">docs/operations/porsche-operations.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="dns.html">← Set up DNS</a><a href="first-machine.html">Your first machine →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

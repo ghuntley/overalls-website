@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -111,14 +111,14 @@
 <p>Every role can run on one host. A deployment with redundancy spreads Marshall across at least three hosts with a highly available database.</p>
 
 <h2>Your fleet is a Git repository</h2>
-<p>Hosts don't take commands from your laptop. Each one polls a branch of a Git repository you control, builds the exact revision, applies migrations, switches and checks its own health. So step one is to fork Overalls and make the fleet yours:</p>
+<p>Each host polls the <code>trunk</code> branch of a Git repository you control, builds its own Buck2 deployment target, applies migrations, switches and checks its own health. So step one is to fork Overalls and make the fleet yours:</p>
 <ol>
 <li>Fork <a href="https://github.com/ghuntley/overalls">github.com/ghuntley/overalls <span aria-hidden="true">↗</span></a> to a Git server your hosts can reach over SSH.</li>
-<li>Replace the example hosts in <code>fleet/hosts/</code> with your own. <code>fleet/hosts/overalls/</code> is a complete, working reference.</li>
-<li>Put your operators and recovery users in <code>nix/users.nix</code>, and the public addresses allowed to reach your fleet in <code>nix/allowed-hosts.nix</code>.</li>
-<li>Commit and push. Encrypted secrets live under <code>secrets/</code>; plaintext never goes in the repo.</li>
+<li>Replace the example hosts in <code>fleet/hosts/</code> with your own. The <code>fleet/roles/control-plane/</code> modules and <code>fleet/hosts/panterloons/</code> show the control-plane configuration; <code>fleet/hosts/dungarees/</code> is a worker.</li>
+<li>Put operators and recovery users in <code>nix/policy/identity/users.nix</code>. Declare host roles in <code>nix/policy/fleet/</code> and reviewed network sources in <code>nix/policy/network/allowed-hosts.nix</code>. Public addresses live in the encrypted <code>fleet-addresses</code> document, with logical names in <code>nix/policy/network/fleet-addresses.nix</code>.</li>
+<li>Commit and push to <code>trunk</code>. Encrypted secrets live under <code>secrets/</code>; plaintext never goes in the repo.</li>
 </ol>
-<blockquote><p>Some modules, options and units still use the project's former codename <code>kittens</code>, for example <code>services.kittensAutoUpdate</code>. Type them exactly as shown.</p></blockquote>
+<p>Buck2 is the build entry point. Nix supplies the pinned toolchains and dependencies and assembles the NixOS systems and guest images.</p>
 
 <h2>Requirements</h2>
 <dl class="kv">
@@ -141,12 +141,12 @@
 <li><span class="step-marker" aria-hidden="true"></span><a href="first-machine.html">Your first machine</a>: sign in, SSH keys, CLI, terminal</li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="operations.html">Day-two operations</a>: updates, drains, backups, logs</li>
 </ol>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/deployment.md">docs/deployment.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/deployment.md">docs/operations/deployment.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><span></span><a href="provision.html">Provision a host →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -99,7 +99,7 @@
 <dl class="kv">
 <div><dt>Sign in</dt><dd><code>https://&lt;your-domain&gt;/sign-in</code>, by magic link; passkeys are also supported</dd></div>
 <div><dt>Machines</dt><dd><code>https://&lt;your-domain&gt;/machines</code></dd></div>
-<div><dt>SSH keys</dt><dd><code>https://&lt;your-domain&gt;/settings/ssh-keys</code></dd></div>
+<div><dt>SSH keys</dt><dd><code>https://&lt;your-domain&gt;/settings#ssh-keys</code></dd></div>
 </dl>
 
 <h2>1. Sign in</h2>
@@ -133,14 +133,14 @@ overalls agent --machine &lt;machine-uuid&gt;</pre>
 <pre data-copy>https://&lt;your-domain&gt;/#https://github.com/OWNER/REPO</pre>
 
 <p>The toolbar extension does the same with one click on GitHub, GitLab, Codeberg and Bitbucket Cloud. It sends only the repository's origin and path, and never page contents. Your deployment serves the unsigned developer packages at <code>/bin/chrome.zip</code> and <code>/bin/firefox.xpi</code>.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/quickstart.md">Getting started <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/commands.md">Command reference <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/marshall/priv/docs/automation.md">Automation <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/marshall/priv/docs/quickstart.md">Getting started <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/marshall/priv/docs/commands.md">Command reference <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/marshall/priv/docs/automation.md">Automation <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="enroll.html">← Enroll hosts and images</a><a href="operations.html">Day-two operations →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

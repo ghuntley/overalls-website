@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -143,7 +143,7 @@
   nameservers = [ "ns1.example.com" "ns2.example.com" ];
   mailbox = "hostmaster.example.com";
   controlPlane = "https://example.com";
-  credentialFile = "/run/kittens-secrets/audi-dns/token";
+  credentialFile = "/run/overalls-secrets/audi-dns/token";
   openFirewall = true;
 };</pre>
 
@@ -154,7 +154,7 @@
 <pre data-copy>bin/marshall eval 'Marshall.Operations.CLI.main()' audi-dns-rotate audi-host1-dns /private/host1-dns.token
 bin/marshall eval 'Marshall.Operations.CLI.main()' audi-gateway-rotate audi-host1 HOST_UUID ADDRESS /private/host1.token</pre>
 
-<p>Check each file with <code>audi-dns-verify</code> or <code>audi-gateway-verify</code>. Then encrypt the tokens into each host's secret documents with <code>nix run .#secrets -- encrypt</code> and run <code>nix run .#secrets -- check</code>. <code>HOST_UUID</code> is the enrolled Lilly host's ID, and <code>ADDRESS</code> is the gateway's public address.</p>
+<p>Check each file with <code>audi-dns-verify</code> or <code>audi-gateway-verify</code>. Then encrypt the tokens into each host's secret documents with <code>tools/buck2 run //:secrets -- encrypt</code> and run <code>tools/buck2 run //:secrets -- check</code>. <code>HOST_UUID</code> is the enrolled Lilly host's ID, and <code>ADDRESS</code> is the gateway's public address.</p>
 
 <h2>5. Wildcard certificate</h2>
 <p>Marshall requests one Let's Encrypt certificate for <code>*.apps.&lt;your-domain&gt;</code> using DNS-01. Every Audi DNS replica publishes the challenge record, so you don't need DNS provider credentials for it, and Marshall installs the certificate on every gateway. Machine hostnames get HTTPS without any per-machine records.</p>
@@ -165,13 +165,13 @@ dig @ns2.example.com apps.example.com SOA
 dig +trace apps.example.com NS</pre>
 
 <p>Check that UDP and TCP 53 reach every Audi DNS host, and that 22, 80 and 443 reach every gateway, from a network outside your fleet. Then stop one <code>audi-dns</code> at a time and confirm the others keep answering.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/audi.md">docs/audi.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/fleet-network.md">docs/fleet-network.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/services/audi.md">docs/services/audi.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/fleet-network.md">docs/operations/fleet-network.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="deploy.html">← Deploy the control plane</a><a href="enroll.html">Enroll hosts and images →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

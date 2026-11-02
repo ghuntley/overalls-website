@@ -1,4 +1,4 @@
-from layout import ADR, DOCS, MARK, SOURCE, page
+from layout import ADR, DOCS, MARK, SOURCE, SOURCE_BRANCH, SOURCE_TREE, page
 
 
 def status(tone):
@@ -17,25 +17,35 @@ FEATURES = [
      "packages with a lockfile."),
     ("Windows Server 2025", "stable",
      "Booted from firmware under a patched Firecracker, with guest agents for readiness, SSH and the terminal."),
-    ("AlmaLinux", "experimental",
+    ("Arch Linux", "stable",
+     "A rolling-release Linux guest assembled from pinned package inputs. Develop and test on Arch with "
+     "SSH, the browser terminal, repository checkout and the guest agent tools."),
+    ("AlmaLinux", "stable",
      "A RHEL-compatible guest for teams that build, package and test against Red Hat Enterprise Linux and "
-     "its rebuilds. Being built now."),
-    ("FreeBSD", "experimental",
-     "FreeBSD guests, so BSD software gets developed and tested on a real FreeBSD kernel rather than "
-     "emulated in Linux. Being built now."),
-    ("illumos", "experimental",
-     "illumos guests, the open-source descendant of OpenSolaris, for work on Solaris-heritage systems. "
-     "Being built now."),
+     "its rebuilds. The selected image includes SSH, the browser terminal, repository checkout and a personal "
+     "browser editor."),
+    ("FreeBSD 14.3", "preview",
+     "Develop and test BSD software on a native FreeBSD kernel under Firecracker. The promoted image has "
+     "passed SSH and stop/start lifecycle checks. Browser editor support is unavailable; broader native "
+     "verification is still in progress."),
+    ("OmniOS r151050", "preview",
+     "An illumos guest for work on Solaris-heritage systems, running the native OmniOS kernel. Promoted "
+     "images have passed native service and lifecycle checks. The browser editor is unavailable, and each "
+     "new image needs its own verification."),
     ("Tools already installed", "stable",
-     "Linux guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv "
+     "NixOS and Ubuntu guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv "
      "installed."),
     ("Browser terminal", "stable",
      "Run many persistent terminals per machine from a browser tab. People you share with start "
      "in watch mode and can take control and hand it back."),
-    ("Clients for macOS, Linux and Windows", "stable",
+    ("CLI for macOS, Linux and Windows", "stable",
      "The <code>overalls</code> client runs on macOS (Apple Silicon and Intel), Linux (x86_64 and arm64) and "
-     "Windows. A one-line installer sets up SSH, and you can connect to any machine, whether it runs NixOS, "
-     "Ubuntu or Windows."),
+     "Windows. A one-line installer sets up SSH to the machines you can access, across the supported guest "
+     "operating systems."),
+    ("Mila desktop and mobile app", "preview",
+     "Mila has native clients for iOS, Android, macOS, Linux and Windows, with a shared Rust core. Approve "
+     "its device key in the browser, then manage machines and agent threads over one SSH connection to "
+     "Porsche. Platform integration and release verification are still being completed."),
     ("SSH management", "stable",
      "<code>ssh &lt;gateway&gt; new</code>, <code>ls</code>, <code>start</code>, <code>stop</code> "
      "and <code>rm</code>, with <code>--json</code> and retry-safe request IDs for scripts. "
@@ -76,10 +86,11 @@ FEATURES = [
      "workflow on your own hardware. You can also prompt from your terminal after approving it in the browser."),
     ("Browser editor", "preview",
      "A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as "
-     "you inside the guest. It is verified on NixOS; Ubuntu support is partial."),
+     "you inside the guest. NixOS, Ubuntu, Arch and AlmaLinux images carry it, with different verification "
+     "coverage. Windows, FreeBSD and OmniOS images don't expose the editor."),
     ("Claude Code and Codex", "stable",
-     "Pre-installed on every guest image that supports them, and ready to use. They're already pointed at "
-     "Ziggy, so there's nothing to configure: no API keys or credentials are installed on the machine."),
+     "NixOS and Ubuntu include Claude Code and Codex, configured to use Ziggy. Enable the matching OpenAI "
+     "or Anthropic provider on your deployment; provider keys stay outside the guest."),
     ("Inference without keys", "stable",
      "Guests call <code>https://llm.internal</code> for OpenAI and Anthropic models. Ziggy adds the provider "
      "credentials outside the guest and records usage per account, so no API key ever lives in a VM."),
@@ -104,8 +115,8 @@ FEATURES = [
      "PostgreSQL, host identities and keys. Running guests sync first and are never paused. Built-in checks "
      "read the backups back to prove they restore."),
     ("Inception", "experimental",
-     "A 16 vCPU guest that runs a whole Overalls stack inside itself, including nested Firecracker guests. "
-     "Useful for developing Overalls within Overalls."),
+     "A development profile intended to run a whole Overalls stack inside a 16 vCPU guest, including "
+     "nested Firecracker machines. It is currently broken and under repair."),
     ("Multi-host fleet and HA", "stable",
      "Run multiple Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly "
      "hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions "
@@ -114,8 +125,8 @@ FEATURES = [
 
 CATEGORIES = [
     ("Machines", ["Persistent microVMs", "Clone, resize, relocate", "Tools already installed", "Caching HTTP proxy", "Locked-down profile"]),
-    ("Operating systems", ["NixOS", "Ubuntu 26.04 LTS", "Windows Server 2025", "AlmaLinux", "FreeBSD", "illumos"]),
-    ("Working on a machine", ["Browser terminal", "Clients for macOS, Linux and Windows", "SSH management", "Public web apps", "Browser editor"]),
+    ("Operating systems", ["NixOS", "Ubuntu 26.04 LTS", "Arch Linux", "AlmaLinux", "Windows Server 2025", "FreeBSD 14.3", "OmniOS r151050"]),
+    ("Working on a machine", ["Browser terminal", "CLI for macOS, Linux and Windows", "SSH management", "Public web apps", "Browser editor", "Mila desktop and mobile app"]),
     ("Collaboration", ["Share with coworkers", "Teams"]),
     ("Starting from a repository", ["Repo launch links", "Browser extension"]),
     ("AI", ["Claude Code and Codex", "Inference without keys", "AI usage accounting", "Integrations without keys", "Agent threads"]),
@@ -147,14 +158,14 @@ PATHS_DIAGRAM = """\
       ┌─ control plane · one region ─────────────────────────────────────────┐
       │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL            │
       └───────▲──────────────────────────────────────────────────────▲───────┘
-              │ web terminal and                  relay over HTTPS,  │
-              │ browser editor                 dialled out by Lilly  │
+              │ browser terminal                  relay over HTTPS,  │
+              │                                dialled out by Lilly  │
               │                                                      │
  ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
  │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
- │ browser                 │                          │                            │
- │ ssh, VS Code,           │   direct, same region    │                            │
- │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ │ browser terminal        │                          │                            │
+ │ ssh, VS Code, web apps, │   direct, same region    │                            │
+ │ browser editor  ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘"""
 
 # Outbound sponsor links carry UTM tags so sponsors can attribute visits to ghuntley.
@@ -200,9 +211,9 @@ def landing():
 <div class="hero">
 <div>
 <h1>An AI-first developer platform <span class="line">that you own.</span></h1>
-<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM running NixOS, Ubuntu or Windows, and it keeps its disk, name and address when you stop, start, resize, clone or move it.</p>
+<p class="lede">Overalls is a self-hosted platform for development machines and the AI agents that work on them. Every machine is a persistent Firecracker microVM. Choose NixOS, Ubuntu, Arch Linux, AlmaLinux, FreeBSD, OmniOS or Windows, and keep its disk, name and address when you stop, start, resize, clone or move it.</p>
 <p class="lede">Overalls has its own agent built in: start a thread on any machine from the browser or the CLI, and it keeps working after you close your laptop, waking the machine if it was stopped. It's the Amp orbs workflow on hardware you own.</p>
-<p class="lede">Claude Code and Codex come pre-installed too, with no API keys on the machine and every token accounted for. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Put hosts in every region your team works in.</p>
+<p class="lede">NixOS and Ubuntu include Claude Code and Codex, configured for your deployment's inference providers, with provider keys kept outside the machine. Open any repository, branch or pull request in a fresh machine with one click, share it with your coworkers, and work from the browser, SSH, VS Code or the <code>overalls</code> CLI. Mila's native desktop and mobile clients are in preview. Put hosts in every region your team works in.</p>
 <p class="lede">It's open source under the MIT licence. There is no hosted version to sign up for: you install it and run it yourself.</p>
 <div class="row actions">
 <a class="console-button primary" href="self-host/index.html">Self-host it →</a>
@@ -218,12 +229,13 @@ def landing():
 <section aria-labelledby="what">
 <h2 id="what">What you get</h2>
 <p class="legend"><span class="status-label" data-tone="stable">STABLE</span> built and covered by acceptance tests · <span class="status-label" data-tone="preview">PREVIEW</span> works, with rough edges · <span class="status-label" data-tone="experimental">EXPERIMENTAL</span> still being built</p>
+<p>Guest capabilities depend on the image. See the <a href="{DOCS}guests/os-matrix.md">OS matrix and verification limits <span aria-hidden="true">↗</span></a>.</p>
 {cards}
 </section>
 
 <section aria-labelledby="how">
 <h2 id="how">How it fits together</h2>
-<p>Marshall is the web app and control plane, a Phoenix and Ash application backed by PostgreSQL. Lilly runs on each host. It starts Firecracker guests on ZFS and connects to Marshall over HTTPS to report capacity and receive commands. Porsche handles management over SSH, and Audi serves DNS, guest SSH and web apps. Each guest gets an isolated network, and traffic between guests is blocked.</p>
+<p>Marshall is the web app and control plane, a Phoenix and Ash application backed by PostgreSQL. Lilly runs on each host. It starts Firecracker guests on ZFS and connects to Marshall over HTTPS to report capacity and receive commands. Porsche handles management over SSH, and Audi serves DNS, guest SSH, web apps and the browser editor. Each guest gets an isolated network, and traffic between guests is blocked.</p>
 <figure class="diagram">
 <pre role="img" aria-label="Browsers reach Marshall through a TLS proxy and SSH management goes through Porsche. Marshall uses PostgreSQL. Several hosts each run Lilly, which dials out to Marshall over HTTPS and runs Firecracker guests on ZFS. Audi routes guest SSH and web traffic to whichever host runs the guest.">{LANDING_DIAGRAM}</pre>
 <figcaption>One control plane, many hosts. Add a host and Marshall starts placing machines on it. <a href="architecture.html">Full architecture →</a></figcaption>
@@ -237,10 +249,10 @@ def landing():
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">{REGIONS_DIAGRAM}</pre>
 <figcaption>Centralise the control plane; distribute the hosts.</figcaption>
 </figure>
-<p>There are two ways into a machine. <strong>SSH and shared web apps go direct</strong>: <code>ssh</code>, VS Code over Remote-SSH, and the web apps a machine shares connect to Audi on the machine's own host, so they stay in the region and get local latency. <strong>The web interface goes through the control plane</strong>: the browser terminal and the browser editor are relayed by Marshall, so they cross regions when the control plane is far away.</p>
+<p>There are two ways into a machine. <strong>SSH, shared web apps and the browser editor go direct</strong>: they connect to Audi on the machine's own host, so their data stays in the region. VS Code over Remote-SSH uses the same SSH path. Marshall still authorises access. <strong>The browser terminal goes through the control plane</strong>, so its traffic crosses regions when the control plane is far away.</p>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
-<figcaption>For the lowest latency, use SSH, VS Code or a shared web app. The browser terminal is there for when you're away from your laptop.</figcaption>
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal goes up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code, shared web apps and the browser editor connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
+<figcaption>SSH, shared web apps and the browser editor connect to the machine's region. The browser terminal goes through Marshall.</figcaption>
 </figure>
 </section>
 
@@ -258,7 +270,7 @@ def landing():
 
 <section aria-labelledby="run">
 <h2 id="run">Run it yourself</h2>
-<p>Overalls is a set of NixOS modules plus tools for installing and enrolling bare-metal hosts. Your fleet is defined in a Git repository: you fork Overalls, declare your hosts, and each host keeps itself up to date from your <code>main</code> branch. You can start with one server and add hosts later. To make the installation your own (patch a component, pin a package, add tools to the guest images), use <a href="https://ghuntley.com/nix/?{UTM}">Nix overlays <span aria-hidden="true">↗</span></a> in your fork.</p>
+<p>Overalls is a set of NixOS modules plus tools for installing and enrolling bare-metal hosts. Your fleet is defined in a Git repository: you fork Overalls, declare your hosts, and each host keeps itself up to date from your <code>{SOURCE_BRANCH}</code> branch. Buck2 builds the software with Nix-pinned toolchains and assembles the NixOS systems. You can start with one server and add hosts later. To make the installation your own (patch a component, pin a package, add tools to the guest images), use <a href="https://ghuntley.com/nix/?{UTM}">Nix overlays <span aria-hidden="true">↗</span></a> in your fork.</p>
 <ol class="steps">
 <li data-state="current"><span class="step-marker" aria-hidden="true"></span><a href="self-host/index.html">Read the requirements and fork the repo</a></li>
 <li><span class="step-marker" aria-hidden="true"></span><a href="self-host/provision.html">Install NixOS on a bare-metal host</a></li>
@@ -398,16 +410,16 @@ COMPONENTS = [
      "The <code>overalls</code> CLI: wildcard SSH, <code>open</code> for repos, <code>agent</code> prompts. It also runs the agent's tools inside the guest."),
     ("Marvin", "marvin/", "Browser extension",
      "Opens the repository page you're on in your Overalls deployment."),
-    ("Mila", "mila/", "Desktop and mobile client (Flutter)",
-     "Manages machines over one SSH connection to Porsche, signs in by approving a device key in the browser, and opens <code>overalls://</code> links on iOS, Android, macOS and Windows."),
+    ("Mila", "mila/", "Native desktop and mobile client (preview)",
+     "Native clients over a shared Rust core for iOS, Android, macOS, Linux and Windows. Manages machines and threads over one SSH connection to Porsche after browser approval of a device key; platform verification remains partial."),
     ("Susan", "susan/", "Push notification relay",
      "Relays end-to-end encrypted Mila notifications to APNs, FCM and WNS without seeing their content."),
     ("Peach", "peach/", "Guest reflection service",
      "Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Opt-in for each host, with a credential issued by Marshall; the private-services certificate must also cover <code>reflection.internal</code>."),
     ("Protocol", "protocol/", "Shared wire schemas",
      "Validates the messages services exchange, so their interfaces stay consistent."),
-    ("Fleet and Nix", "fleet/ nix/", "Declarative infrastructure",
-     "NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools."),
+    ("Fleet, Nix and Buck2", "fleet/ nix/ buck/", "Declarative infrastructure and builds",
+     "NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools. Buck2 builds with Nix-pinned toolchains and assembles host deployments."),
 ]
 
 ADRS = [
@@ -423,6 +435,10 @@ ADRS = [
     ("0153-official-source-browser-editor.md", "Official-source browser editor"),
     ("0155-stopped-only-relocation.md", "Stopped-only relocation"),
     ("0161-monospace-web-presentation.md", "Monospace Web presentation"),
+    ("0190-native-kernel-provenance-and-admission.md", "Native guest kernels and image admission"),
+    ("0249-mila-rust-core-native-clients.md", "Mila's Rust core and native clients"),
+    ("0269-buck2-build-system-with-nix-toolchains.md", "Buck2 builds with Nix toolchains"),
+    ("0271-buck2-host-self-deployment.md", "Host self-deployment through Buck2"),
 ]
 
 
@@ -467,15 +483,15 @@ def architecture():
 <div class="prose">
 <p>We recommend running Marshall in a single region. Its instances share one PostgreSQL, and admission, sharing and lifecycle decisions all depend on that database, so keep them close to it. Run several instances in that region for high availability.</p>
 <p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work.</p>
-<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, and the web apps a machine shares enter through Audi on the machine's own host and stay in that region. The browser terminal and browser editor are relayed through Marshall, over the connection the host dialled out, so they pay the round trip to the control-plane region.</p>
+<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, shared web apps and the browser editor enter through Audi on the machine's own host. Their data stays in that region, while Marshall authorises access. The browser terminal is relayed through Marshall, over the connection the host dialled out, so it pays the round trip to the control-plane region.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">{REGIONS_DIAGRAM}</pre>
 <figcaption>One control-plane region, hosts wherever they're needed.</figcaption>
 </figure>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
-<figcaption>SSH and shared web apps go direct; the web interface goes by way of the control plane.</figcaption>
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal goes up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code, shared web apps and the browser editor connect directly to Audi on the Singapore host.">{PATHS_DIAGRAM}</pre>
+<figcaption>SSH, shared web apps and the browser editor go direct; the browser terminal goes through Marshall.</figcaption>
 </figure>
 </section>
 
@@ -517,11 +533,11 @@ def architecture():
 <section aria-labelledby="adrs">
 <h2 id="adrs">Decision records</h2>
 <div class="prose">
-<p>Every design decision is written up as an architecture decision record (ADR), with a review recording the evidence. There are over 170 of them. Some good places to start:</p>
+<p>Every design decision is written up as an architecture decision record (ADR), with a review recording the evidence. Some good places to start:</p>
 <ul>
 {adrs}
 </ul>
-<p><a href="{SOURCE}/tree/main/docs/architecture/decisions">All decision records <span aria-hidden="true">↗</span></a> · <a href="{DOCS}architecture/README.md">Implementation status <span aria-hidden="true">↗</span></a></p>
+<p><a href="{SOURCE_TREE}docs/architecture/decisions">All decision records <span aria-hidden="true">↗</span></a> · <a href="{DOCS}architecture/README.md">Implementation status <span aria-hidden="true">↗</span></a></p>
 </div>
 </section>
 </main>

@@ -1,4 +1,4 @@
-"""Two paths to a machine: the web interface via the control plane, SSH direct."""
+"""Two paths: browser terminals via the control plane; SSH, apps and editors direct."""
 import pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / ".claude/skills/overalls-design/scripts"))
 from canvas import Canvas
@@ -14,8 +14,7 @@ c.put(2, hmid, "▲")
 for r in (3, 4, 5):
     c.put(r, dmid, "│")
     c.put(r, hmid, "│")
-c.put(3, dmid + 2, "web terminal and")
-c.put(4, dmid + 2, "browser editor")
+c.put(3, dmid + 2, "browser terminal")
 c.put(3, hmid - 2 - len("relay over HTTPS,"), "relay over HTTPS,")
 c.put(4, hmid - 2 - len("dialled out by Lilly"), "dialled out by Lilly")
 c.box(6, DX, DW, 6)
@@ -23,9 +22,9 @@ c.put(6, dmid, "┴")
 c.box(6, HX, HW, 6)
 c.put(6, hmid, "┴")
 c.put(7, DX + 2, "DEVELOPER IN SINGAPORE")
-c.put(8, DX + 2, "browser")
-c.put(9, DX + 2, "ssh, VS Code,")
-c.put(10, DX + 2, "shared web apps")
+c.put(8, DX + 2, "browser terminal")
+c.put(9, DX + 2, "ssh, VS Code, web apps,")
+c.put(10, DX + 2, "browser editor")
 c.put(7, HX + 2, "HOST IN SINGAPORE")
 c.put(10, HX + 2, "Audi ─▶ Lilly ─▶ guest")
 c.put(9, DX + DW + 3, "direct, same region")

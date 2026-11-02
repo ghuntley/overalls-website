@@ -1,7 +1,10 @@
 """Shared page chrome for the Overalls static site. Output is plain HTML."""
 
 SOURCE = "https://github.com/ghuntley/overalls"
-DOCS = SOURCE + "/blob/main/docs/"
+SOURCE_BRANCH = "trunk"
+SOURCE_BLOB = SOURCE + "/blob/" + SOURCE_BRANCH + "/"
+SOURCE_TREE = SOURCE + "/tree/" + SOURCE_BRANCH + "/"
+DOCS = SOURCE_BLOB + "docs/"
 ADR = DOCS + "architecture/decisions/"
 
 MARK = """\
@@ -151,7 +154,7 @@ def header(r, current):
 
 def footer(r):
     return f"""<footer class="site-footer">
-<p><a href="{r}index.html">Overalls</a> is open source under the <a href="{SOURCE}/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="{r}index.html">Overalls</a> is open source under the <a href="{SOURCE_BLOB}LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="{r}assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="{r}assets/monospace-web-LICENSE.md">MIT</a>). <a href="{r}security/">Security</a> · <a href="{r}llms.txt">llms.txt</a></p>
 </footer>
 """
@@ -192,8 +195,8 @@ def guide_page(slug, title, description, body):
         + "\n</ul>\n</li>\n"
         '<li><strong>Reference</strong>\n<ul>\n'
         '<li><a href="../architecture.html">Architecture</a></li>\n'
-        f'<li><a href="{SOURCE}/tree/main/docs">Repository docs ↗</a></li>\n'
-        f'<li><a href="{SOURCE}/tree/main/docs/architecture/decisions">Decision records ↗</a></li>\n'
+        f'<li><a href="{SOURCE_TREE}docs">Repository docs ↗</a></li>\n'
+        f'<li><a href="{SOURCE_TREE}docs/architecture/decisions">Decision records ↗</a></li>\n'
         "</ul>\n</li>\n</ul>\n</nav>\n</aside>\n"
     )
     main = (

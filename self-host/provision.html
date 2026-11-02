@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -95,15 +95,15 @@
 </aside>
 <main id="main-content" class="docs-content prose">
 <h1>Provision a host</h1>
-<p>The bootstrap tool, <code>nix run .#host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
+<p>The bootstrap tool, <code>tools/buck2 run //:host</code>, turns a rented server in rescue mode into a NixOS host that installs from a reviewed plan and then updates itself. It never trusts a new SSH key automatically and never formats a disk you haven't approved.</p>
 <dl class="kv">
 <div><dt>Commands</dt><dd><code>discover</code> · <code>plan</code> · <code>install</code> · <code>enroll</code> · <code>verify</code></dd></div>
-<div><dt>Inventory</dt><dd><code>fleet/hosts/NAME/host.json</code>, plus an optional <code>configuration.nix</code> for roles</dd></div>
+<div><dt>Inventory</dt><dd><code>fleet/hosts/NAME/host.json</code> and <code>BUCK</code>, plus an optional <code>configuration.nix</code> for roles</dd></div>
 </dl>
 
 <h2>1. Discover</h2>
 <p>Get the rescue system's Ed25519 host key through a trusted channel and put it in its own known-hosts file. Then record what the machine has:</p>
-<pre data-copy>nix run .#host -- discover --platform hetzner --name example \
+<pre data-copy>tools/buck2 run //:host -- discover --platform hetzner --name example \
   --target root@HOST --known-hosts /private/rescue-known-hosts \
   --identity /private/operator-key --output /private/example.candidate.json</pre>
 
@@ -116,45 +116,55 @@
 <li>Choose <code>storage.system</code> by disk ID: two physical disks on Hetzner, or the existing root EBS volume on EC2. On EC2, list the local NVMe IDs in <code>storage.guests</code>.</li>
 <li>Give <code>identity.hostId</code> a persistent, nonzero eight-digit hex value. Leave <code>identity.sshKeys</code> empty for now.</li>
 <li>Set <code>budgets.guestCpuCores</code>, <code>guestMemoryMiB</code> and <code>arcMaxMiB</code>, and on Hetzner a reviewed <code>storage.quotaBytes</code>.</li>
-<li>Add your Git server's known-host lines to <code>git.knownHosts</code>. Private keys never go in the declaration.</li>
+<li>Set <code>git.repository</code> to your fork's SSH URL and add your Git server's known-host lines to <code>git.knownHosts</code>. Private keys never go in the declaration.</li>
 </ul>
-<p>If the host will run Lilly, declare that role now (see <a href="enroll.html">enroll hosts</a>), then commit and push to <code>main</code>. Planning only accepts a commit that has been pushed to <code>main</code>.</p>
+<p>Add <code>fleet/hosts/NAME/BUCK</code> so the installer, enrollment tool and updater can build this host's targets:</p>
+<pre data-copy>load("@root//buck:fleet.bzl", "fleet_host")
+
+fleet_host()</pre>
+
+<p>If the host will run Lilly, declare that role now (see <a href="enroll.html">enroll hosts</a>), then commit and push to <code>trunk</code>. Planning only accepts a commit that has been pushed to <code>trunk</code>.</p>
 
 <h2>3. Plan</h2>
-<pre data-copy>nix run .#host -- plan --host example --revision FULL_COMMIT \
+<p>Use your fork's SSH URL for <code>&lt;repository-ssh-url&gt;</code>, matching <code>git.repository</code> in the declaration:</p>
+<pre data-copy>tools/buck2 run //:host -- plan --host example --revision FULL_COMMIT \
+  --repository &lt;repository-ssh-url&gt; \
   --target root@HOST --known-hosts /private/rescue-known-hosts \
   --identity /private/operator-key --output /private/example.plan.json</pre>
 
 <p>The plan pins the declaration, the authenticated target key, the firmware, the revision, the exact system, disk-layout and kexec paths, and the list of disks it will erase. Read it. Everything is built before anything destructive happens.</p>
 
 <h2>4. Install</h2>
-<pre data-copy>nix run .#host -- install --plan /private/example.plan.json --erase PLAN_SHA256 \
+<pre data-copy>tools/buck2 run //:host -- install --plan /private/example.plan.json --erase PLAN_SHA256 \
   --target root@HOST --known-hosts /private/rescue-known-hosts \
   --identity /private/operator-key</pre>
 
 <p>The installer kexecs into a pinned image, compares the disk inventory again and formats under a lock. It refuses if a device is mounted or a pool is imported. The new host key is generated on the host; only its public half comes back, recorded in <code>PLAN.installed.json</code>. <strong>Keep that file.</strong> An interrupted install never resumes formatting silently.</p>
 
 <h2>5. Enroll and verify</h2>
-<p>Record the installed public key in <code>identity.sshKeys</code> and in a new known-hosts file. Add the Git credential reference <code>secrets/NAME-git.enc.json</code> to <code>credentials</code>, then prepare the encrypted Git bundle. Use your own account name from <code>nix/users.nix</code> in place of <code>YOU</code>:</p>
-<pre data-copy>nix run .#host -- enroll --host example --deploy-key /private/shared-git-key \
-  --root . --target YOU@HOST --known-hosts /private/installed-known-hosts \
-  --identity /private/operator-key</pre>
+<p>Record the installed public key in <code>identity.sshKeys</code> and in a new known-hosts file. Add <code>{"name":"example-git","path":"secrets/example-git.enc.json"}</code> to <code>credentials</code>. Prepare a JSON document at <code>/private/example-git.json</code>, outside the checkout and Nix store, readable only by you. Its structure is:</p>
+<pre data-copy>{"overalls-git":{"production":{"GIT_DEPLOY_KEY":"&lt;complete SSH deploy key&gt;"}}}</pre>
+
+<p>Use the complete read-only deploy key, with its line breaks encoded as JSON string escapes. Encrypt the document to the authenticated host and recovery recipients:</p>
+<pre data-copy>tools/buck2 run //:secrets -- encrypt example-git --input /private/example-git.json</pre>
 
 <p>Push the updated declaration and ciphertext, then activate that exact commit and check it:</p>
-<pre data-copy>nix run .#host -- enroll --host example --revision ENROLLED_FULL_COMMIT \
+<pre data-copy>tools/buck2 run //:host -- enroll --host example --revision ENROLLED_FULL_COMMIT \
+  --repository &lt;repository-ssh-url&gt; \
   --install-receipt /private/example.plan.json.installed.json \
   --target YOU@HOST --known-hosts /private/installed-known-hosts \
   --identity /private/operator-key
-nix run .#host -- verify --target YOU@HOST \
+tools/buck2 run //:host -- verify --target YOU@HOST \
   --known-hosts /private/installed-known-hosts --identity /private/operator-key</pre>
 
-<p>From here the host polls <code>main</code> every ten seconds, with jitter. Changes to the platform, firmware, disks or identity are rejected by ordinary updates; those need deliberate maintenance.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/host-provisioning.md">docs/host-provisioning.md <span aria-hidden="true">↗</span></a></p>
+<p><code>YOU</code> is your own account name from <code>nix/policy/identity/users.nix</code>. Remove the private plaintext document when encryption succeeds.</p>
+<p>From here the host polls <code>trunk</code> every ten seconds, with jitter. Changes to the platform, firmware, disks or identity are rejected by ordinary updates; those need deliberate maintenance.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/host-provisioning.md">docs/operations/host-provisioning.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="index.html">← Overview</a><a href="deploy.html">Deploy the control plane →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>

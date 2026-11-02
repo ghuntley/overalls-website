@@ -89,11 +89,11 @@
 <tr><td class="width-min" data-label="Name:"><strong>Ziggy</strong><br><code class="muted">ziggy/</code></td><td data-label="Role:">Inference proxy</td><td class="width-auto" data-label="Gives you:"><code>llm.internal</code> for guests, with no provider keys inside the VM and usage recorded per account.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Lyra</strong><br><code class="muted">lyra/</code></td><td data-label="Role:">CLI and guest tools (Rust)</td><td class="width-auto" data-label="Gives you:">The <code>overalls</code> CLI: wildcard SSH, <code>open</code> for repos, <code>agent</code> prompts. It also runs the agent's tools inside the guest.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Marvin</strong><br><code class="muted">marvin/</code></td><td data-label="Role:">Browser extension</td><td class="width-auto" data-label="Gives you:">Opens the repository page you're on in your Overalls deployment.</td></tr>
-<tr><td class="width-min" data-label="Name:"><strong>Mila</strong><br><code class="muted">mila/</code></td><td data-label="Role:">Desktop and mobile client (Flutter)</td><td class="width-auto" data-label="Gives you:">Manages machines over one SSH connection to Porsche, signs in by approving a device key in the browser, and opens <code>overalls://</code> links on iOS, Android, macOS and Windows.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Mila</strong><br><code class="muted">mila/</code></td><td data-label="Role:">Native desktop and mobile client (preview)</td><td class="width-auto" data-label="Gives you:">Native clients over a shared Rust core for iOS, Android, macOS, Linux and Windows. Manages machines and threads over one SSH connection to Porsche after browser approval of a device key; platform verification remains partial.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Susan</strong><br><code class="muted">susan/</code></td><td data-label="Role:">Push notification relay</td><td class="width-auto" data-label="Gives you:">Relays end-to-end encrypted Mila notifications to APNs, FCM and WNS without seeing their content.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Peach</strong><br><code class="muted">peach/</code></td><td data-label="Role:">Guest reflection service</td><td class="width-auto" data-label="Gives you:">Serves <code>reflection.internal</code>: a secret-free view of the integrations a running guest may use, authorized by Marshall. Opt-in for each host, with a credential issued by Marshall; the private-services certificate must also cover <code>reflection.internal</code>.</td></tr>
 <tr><td class="width-min" data-label="Name:"><strong>Protocol</strong><br><code class="muted">protocol/</code></td><td data-label="Role:">Shared wire schemas</td><td class="width-auto" data-label="Gives you:">Validates the messages services exchange, so their interfaces stay consistent.</td></tr>
-<tr><td class="width-min" data-label="Name:"><strong>Fleet and Nix</strong><br><code class="muted">fleet/ nix/</code></td><td data-label="Role:">Declarative infrastructure</td><td class="width-auto" data-label="Gives you:">NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools.</td></tr>
+<tr><td class="width-min" data-label="Name:"><strong>Fleet, Nix and Buck2</strong><br><code class="muted">fleet/ nix/ buck/</code></td><td data-label="Role:">Declarative infrastructure and builds</td><td class="width-auto" data-label="Gives you:">NixOS modules, host inventory, guest images, secrets, and the host install and enroll tools. Buck2 builds with Nix-pinned toolchains and assembles host deployments.</td></tr>
 </tbody>
 </table>
 </section>
@@ -129,7 +129,7 @@
 <div class="prose">
 <p>We recommend running Marshall in a single region. Its instances share one PostgreSQL, and admission, sharing and lifecycle decisions all depend on that database, so keep them close to it. Run several instances in that region for high availability.</p>
 <p>Lilly hosts have no such constraint. Each one only needs to reach Marshall over HTTPS, so you can put hosts in every region where your developers work.</p>
-<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, and the web apps a machine shares enter through Audi on the machine's own host and stay in that region. The browser terminal and browser editor are relayed through Marshall, over the connection the host dialled out, so they pay the round trip to the control-plane region.</p>
+<p>Where the traffic goes depends on how you connect. SSH, VS Code over Remote-SSH, shared web apps and the browser editor enter through Audi on the machine's own host. Their data stays in that region, while Marshall authorises access. The browser terminal is relayed through Marshall, over the connection the host dialled out, so it pays the round trip to the control-plane region.</p>
 </div>
 <figure class="diagram">
 <pre role="img" aria-label="The control plane runs in one region: HAProxy in front of several Marshall instances and one PostgreSQL. Lilly hosts in Washington DC, London and Singapore each dial out to it over HTTPS. Each region's hosts run guests on ZFS and Audi for SSH and web apps, serving developers in the Americas, Europe and Asia-Pacific.">          ┌─ control plane · one region ───────────────────────────────┐
@@ -154,19 +154,19 @@
 <figcaption>One control-plane region, hosts wherever they're needed.</figcaption>
 </figure>
 <figure class="diagram">
-<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal and browser editor go up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code and shared web apps connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
+<pre role="img" aria-label="A developer in Singapore uses a machine on a host in Singapore. The browser terminal goes up to the control plane, which relays to the host over a connection Lilly dialled out. SSH, VS Code, shared web apps and the browser editor connect directly to Audi on the Singapore host.">      ┌─ control plane · one region ─────────────────────────────────────────┐
       │  HAProxy ─▶ Marshall · Marshall · Marshall ◀─▶ PostgreSQL            │
       └───────▲──────────────────────────────────────────────────────▲───────┘
-              │ web terminal and                  relay over HTTPS,  │
-              │ browser editor                 dialled out by Lilly  │
+              │ browser terminal                  relay over HTTPS,  │
+              │                                dialled out by Lilly  │
               │                                                      │
  ┌────────────┴────────────┐                          ┌──────────────┴─────────────┐
  │ DEVELOPER IN SINGAPORE  │                          │ HOST IN SINGAPORE          │
- │ browser                 │                          │                            │
- │ ssh, VS Code,           │   direct, same region    │                            │
- │ shared web apps ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
+ │ browser terminal        │                          │                            │
+ │ ssh, VS Code, web apps, │   direct, same region    │                            │
+ │ browser editor  ────────┼─────────────────────────▶│ Audi ─▶ Lilly ─▶ guest     │
  └─────────────────────────┘                          └────────────────────────────┘</pre>
-<figcaption>SSH and shared web apps go direct; the web interface goes by way of the control plane.</figcaption>
+<figcaption>SSH, shared web apps and the browser editor go direct; the browser terminal goes through Marshall.</figcaption>
 </figure>
 </section>
 
@@ -220,27 +220,31 @@
 <section aria-labelledby="adrs">
 <h2 id="adrs">Decision records</h2>
 <div class="prose">
-<p>Every design decision is written up as an architecture decision record (ADR), with a review recording the evidence. There are over 170 of them. Some good places to start:</p>
+<p>Every design decision is written up as an architecture decision record (ADR), with a review recording the evidence. Some good places to start:</p>
 <ul>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0018-persisted-sharing-and-user-machine-access.md">ADR-0018 · Persisted sharing and machine access <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0022-browser-terminal-and-live-login-checks.md">ADR-0022 · Browser terminal and live login checks <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0030-nixos-deployment-and-tls.md">ADR-0030 · NixOS deployment and TLS <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0036-automatic-host-updates.md">ADR-0036 · Automatic host updates <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0043-declarative-host-provisioning.md">ADR-0043 · Declarative host provisioning <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 · Single-host service deployment <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0055-queued-machine-cloning.md">ADR-0055 · Queued machine cloning <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0077-teams-and-shared-resources.md">ADR-0077 · Teams and shared resources <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0128-repository-launch-links.md">ADR-0128 · Repository launch links <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0153-official-source-browser-editor.md">ADR-0153 · Official-source browser editor <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0155-stopped-only-relocation.md">ADR-0155 · Stopped-only relocation <span aria-hidden="true">↗</span></a></li>
-<li><a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/decisions/0161-monospace-web-presentation.md">ADR-0161 · Monospace Web presentation <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0018-persisted-sharing-and-user-machine-access.md">ADR-0018 · Persisted sharing and machine access <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0022-browser-terminal-and-live-login-checks.md">ADR-0022 · Browser terminal and live login checks <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0030-nixos-deployment-and-tls.md">ADR-0030 · NixOS deployment and TLS <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0036-automatic-host-updates.md">ADR-0036 · Automatic host updates <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0043-declarative-host-provisioning.md">ADR-0043 · Declarative host provisioning <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0048-single-host-service-deployment.md">ADR-0048 · Single-host service deployment <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0055-queued-machine-cloning.md">ADR-0055 · Queued machine cloning <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0077-teams-and-shared-resources.md">ADR-0077 · Teams and shared resources <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0128-repository-launch-links.md">ADR-0128 · Repository launch links <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0153-official-source-browser-editor.md">ADR-0153 · Official-source browser editor <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0155-stopped-only-relocation.md">ADR-0155 · Stopped-only relocation <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0161-monospace-web-presentation.md">ADR-0161 · Monospace Web presentation <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0190-native-kernel-provenance-and-admission.md">ADR-0190 · Native guest kernels and image admission <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0249-mila-rust-core-native-clients.md">ADR-0249 · Mila's Rust core and native clients <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0269-buck2-build-system-with-nix-toolchains.md">ADR-0269 · Buck2 builds with Nix toolchains <span aria-hidden="true">↗</span></a></li>
+<li><a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/decisions/0271-buck2-host-self-deployment.md">ADR-0271 · Host self-deployment through Buck2 <span aria-hidden="true">↗</span></a></li>
 </ul>
-<p><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">All decision records <span aria-hidden="true">↗</span></a> · <a href="https://github.com/ghuntley/overalls/blob/main/docs/architecture/README.md">Implementation status <span aria-hidden="true">↗</span></a></p>
+<p><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">All decision records <span aria-hidden="true">↗</span></a> · <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/architecture/README.md">Implementation status <span aria-hidden="true">↗</span></a></p>
 </div>
 </section>
 </main>
 <footer class="site-footer">
-<p><a href="index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="assets/monospace-web-LICENSE.md">MIT</a>). <a href="security/">Security</a> · <a href="llms.txt">llms.txt</a></p>
 </footer>
 </div>

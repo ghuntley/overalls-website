@@ -86,8 +86,8 @@
 <li><strong>Reference</strong>
 <ul>
 <li><a href="../architecture.html">Architecture</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs">Repository docs ↗</a></li>
-<li><a href="https://github.com/ghuntley/overalls/tree/main/docs/architecture/decisions">Decision records ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs">Repository docs ↗</a></li>
+<li><a href="https://github.com/ghuntley/overalls/tree/trunk/docs/architecture/decisions">Decision records ↗</a></li>
 </ul>
 </li>
 </ul>
@@ -97,17 +97,17 @@
 <h1>Day-two operations</h1>
 <p>Once it's running, a fleet mostly looks after itself: hosts update from Git, back themselves up, and report health. These are the controls you'll use when it doesn't.</p>
 <dl class="kv">
-<div><dt>Updates</dt><dd><code>kittens-auto-update</code>, which every host runs from your <code>main</code> branch</dd></div>
+<div><dt>Updates</dt><dd><code>overalls-auto-update</code>, which every enrolled host runs from your <code>trunk</code> branch</dd></div>
 <div><dt>Hosts</dt><dd>Drain, resume and retire with the Marshall operator CLI</dd></div>
-<div><dt>Backups</dt><dd><code>kittens-backup</code>, restic to S3-compatible storage</dd></div>
+<div><dt>Backups</dt><dd><code>overalls-backup</code>, restic to S3-compatible storage</dd></div>
 </dl>
 
 <h2>Automatic updates</h2>
-<p>Each host builds a revision once, stages its secrets, applies compatible migrations, switches, and checks health twice, five seconds apart. A failing revision backs off from thirty seconds to fifteen minutes; pushing a fix skips the wait.</p>
-<pre data-copy>sudo kittens-auto-update status
-sudo systemctl start kittens-auto-update.service
-sudo journalctl -u kittens-auto-update.service
-sudo systemctl stop kittens-auto-update.timer   # before manual recovery</pre>
+<p>Each host builds the candidate revision with <code>tools/buck2 build //fleet/hosts/NAME:deployment</code>, stages its secrets, applies compatible migrations, switches, and checks health twice, five seconds apart. A failing revision backs off from thirty seconds to fifteen minutes; pushing a fix skips the wait.</p>
+<pre data-copy>sudo overalls-auto-update status
+sudo systemctl start overalls-auto-update.service
+sudo journalctl -u overalls-auto-update.service
+sudo systemctl stop overalls-auto-update.timer   # before manual recovery</pre>
 
 <p>Hosts don't coordinate their restarts with each other. Kernel changes and incompatible schema or protocol changes need planned maintenance.</p>
 
@@ -123,7 +123,7 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre
 <p>Owners, managers and team admins can relocate a stopped machine with <code>ssh &lt;gateway&gt; relocate NAME</code>. Marshall chooses the destination host and transfer method. The machine keeps its identity, name, sharing and private address.</p>
 
 <h2>Backups</h2>
-<pre data-copy>services.kittensBackups = {
+<pre data-copy>services.overallsBackups = {
   enable = true;
   postgres.enable = true;
   s3 = {
@@ -132,24 +132,24 @@ bin/marshall eval 'Marshall.Operations.CLI.main()' retire-host REQUEST_UUID</pre
   };
 };</pre>
 
-<pre data-copy>kittens-backup list
-kittens-backup check
-kittens-backup read-check</pre>
+<pre data-copy>overalls-backup list
+overalls-backup check
+overalls-backup read-check</pre>
 
 <p>Only enabled roles add their state. By default that's the host identity and receipts; Lilly's journals, image templates and every ready guest disk (from native ZFS snapshots); a logical dump of Marshall's PostgreSQL; Porsche and Audi keys; and ACME state. A stopped guest is never started just to back it up. A running guest is asked to <code>sync</code> first, but isn't paused.</p>
 <h2>Logs and metrics</h2>
-<p><code>services.kittensLogging</code> sends journals from Marshall, Lilly, Porsche, HAProxy and the system to CloudWatch, OTLP or a fleet log store, with a bounded on-disk queue. Ziggy and Galileo record usage per account.</p>
+<p><code>services.overallsLogging</code> sends journals from Marshall, Lilly, Porsche, HAProxy and the system to CloudWatch, OTLP or a fleet log store, with a bounded on-disk queue. Ziggy and Galileo record usage per account.</p>
 
 <h2>Credentials</h2>
-<p>Rotate a Lilly credential with <code>nix run .#host -- rotate-credential</code>, using the same arguments as <code>prepare-enrollment</code>. Rotation revokes the old credential immediately, so deploy the new ciphertext promptly. Signing secrets, the database URL and the active Cloak key can't change through automatic updates; rotating them needs the coordinated procedure.</p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/host-maintenance.md">docs/host-maintenance.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/backups.md">docs/backups.md <span aria-hidden="true">↗</span></a></p>
-<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/main/docs/observability.md">docs/observability.md <span aria-hidden="true">↗</span></a></p>
+<p>Rotate a Lilly credential with <code>tools/buck2 run //:host -- rotate-credential</code>, using the same arguments as <code>prepare-enrollment</code>. Rotation revokes the old credential immediately, so deploy the new ciphertext promptly. Signing secrets, the database URL and the active Cloak key can't change through automatic updates; rotating them needs the coordinated procedure.</p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/host-maintenance.md">docs/operations/host-maintenance.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/backups.md">docs/operations/backups.md <span aria-hidden="true">↗</span></a></p>
+<p class="muted">Full reference: <a href="https://github.com/ghuntley/overalls/blob/trunk/docs/operations/observability.md">docs/operations/observability.md <span aria-hidden="true">↗</span></a></p>
 <nav class="pager" aria-label="Guide pages"><a href="first-machine.html">← Your first machine</a><a href="../architecture.html">Architecture →</a></nav>
 </main>
 </div>
 <footer class="site-footer">
-<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/main/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
+<p><a href="../index.html">Overalls</a> is open source under the <a href="https://github.com/ghuntley/overalls/blob/trunk/LICENSE">MIT licence <span aria-hidden="true">↗</span></a>. There is no hosted service: you run it.</p>
 <p>Set in <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono <span aria-hidden="true">↗</span></a> (<a href="../assets/fonts/jetbrainsmono-OFL.txt">OFL</a>). Styled after <a href="https://owickstrom.github.io/the-monospace-web/">The Monospace Web <span aria-hidden="true">↗</span></a> by Oskar Wickström (<a href="../assets/monospace-web-LICENSE.md">MIT</a>). <a href="../security/">Security</a> · <a href="../llms.txt">llms.txt</a></p>
 </footer>
 </div>
