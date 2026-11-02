@@ -25,13 +25,9 @@ FEATURES = [
      "its rebuilds. The selected image includes SSH, the browser terminal, repository checkout and a personal "
      "browser editor."),
     ("FreeBSD 14.3", "preview",
-     "Develop and test BSD software on a native FreeBSD kernel under Firecracker. The promoted image has "
-     "passed SSH and stop/start lifecycle checks. Browser editor support is unavailable; broader native "
-     "verification is still in progress."),
+     "Develop and test BSD software on a native FreeBSD kernel under Firecracker."),
     ("OmniOS r151050", "preview",
-     "An illumos guest for work on Solaris-heritage systems, running the native OmniOS kernel. Promoted "
-     "images have passed native service and lifecycle checks. The browser editor is unavailable, and each "
-     "new image needs its own verification."),
+     "An illumos guest for work on Solaris-heritage systems, running the native OmniOS kernel."),
     ("Tools already installed", "stable",
      "NixOS and Ubuntu guests come with Podman (Docker-compatible), git and the GitHub CLI, tmux, Neovim, ripgrep, jq, direnv and devenv "
      "installed."),
@@ -45,7 +41,7 @@ FEATURES = [
     ("Mila desktop and mobile app", "preview",
      "Mila has native clients for iOS, Android, macOS, Linux and Windows, with a shared Rust core. Approve "
      "its device key in the browser, then manage machines and agent threads over one SSH connection to "
-     "Porsche. Platform integration and release verification are still being completed."),
+     "Porsche."),
     ("SSH management", "stable",
      "<code>ssh &lt;gateway&gt; new</code>, <code>ls</code>, <code>start</code>, <code>stop</code> "
      "and <code>rm</code>, with <code>--json</code> and retry-safe request IDs for scripts. "
@@ -86,8 +82,7 @@ FEATURES = [
      "workflow on your own hardware. You can also prompt from your terminal after approving it in the browser."),
     ("Browser editor", "preview",
      "A personal editor built from Microsoft's official Code OSS source, with Open VSX extensions, running as "
-     "you inside the guest. NixOS, Ubuntu, Arch and AlmaLinux images carry it, with different verification "
-     "coverage. Windows, FreeBSD and OmniOS images don't expose the editor."),
+     "you inside the guest. NixOS, Ubuntu, Arch and AlmaLinux images carry it."),
     ("Claude Code and Codex", "stable",
      "NixOS and Ubuntu include Claude Code and Codex, configured to use Ziggy. Enable the matching OpenAI "
      "or Anthropic provider on your deployment; provider keys stay outside the guest."),
@@ -116,7 +111,7 @@ FEATURES = [
      "read the backups back to prove they restore."),
     ("Inception", "experimental",
      "A development profile intended to run a whole Overalls stack inside a 16 vCPU guest, including "
-     "nested Firecracker machines. It is currently broken and under repair."),
+     "nested Firecracker machines."),
     ("Multi-host fleet and HA", "stable",
      "Run multiple Marshall instances behind HAProxy against a shared PostgreSQL, and as many Lilly "
      "hosts as you need. If a Marshall instance is lost, running machines keep running and terminal sessions "
