@@ -112,7 +112,7 @@ def announcement(r):
     # Shown above the header on every page until launch.
     return f"""<aside class="announcement" aria-label="Announcement">
 <span class="status-label" data-tone="experimental">RESEARCH PREVIEW</span>
-<p>Overalls launches on <time datetime="2026-11-03">3 November 2026</time>. <a href="{r}index.html#newsletter">Get notified →</a></p>
+<p>Overalls launches on <time datetime="2026-11-12">12 November 2026</time>. <a href="{r}index.html#newsletter">Get notified →</a></p>
 </aside>
 """
 
